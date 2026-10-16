@@ -1,0 +1,33 @@
+name: manager_accounting
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: manager_accounting_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-manager_accounting}
+      POSTGRES_USER: ${DB_USERNAME:-manager}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-manager}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-manager} -d ${DB_NAME:-manager_accounting}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Servidor de e-mail de desenvolvimento: captura os e-mails enviados pelo backend.
+  # Caixa de entrada: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: manager_accounting_mail
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Interface web
+
+volumes:
+  postgres_data:
