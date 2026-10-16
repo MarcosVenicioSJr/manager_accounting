@@ -7,7 +7,8 @@ status: em revisão (branch feature/login, ainda não validado no Maven)
 modulo: autenticacao
 commits:
   - 7a23399 - Módulo de login: JWT, refresh token, primeiro acesso e telas
-  - Registro 002 no cérebro do projeto
+  - 6a766be - Registro 002 no cérebro do projeto
+  - Tela de login no visual aprovado (azul-marinho, foto da mesa) e Manter-me conectado
 tags:
   - manager_accounting
   - registro
@@ -40,6 +41,7 @@ Primeira parte funcional do sistema: login do contador com JWT, sessão por refr
 | Hash de senha | BCrypt |
 | Senha temporária | Sem coluna `senha_temporaria`: a senha temporária é o próprio hash em `senha_hash` e é trocada no primeiro acesso |
 | Pendência do primeiro acesso | Coluna `primeiro_acesso_concluido` (false até o usuário concluir) |
+| Manter-me conectado | Com a opção marcada, o cookie de refresh sobrevive ao fechamento do navegador; sem ela, é cookie de sessão. A sessão no servidor continua valendo 8h nos dois casos |
 | Dados do primeiro acesso | Nome completo, e-mail e telefone (telefone guardado só com dígitos, 10 a 13) |
 | Proteção | 5 senhas erradas bloqueiam o usuário por 15 min; mensagem sempre genérica (não revela se o login existe) |
 | Política de senha | Mínimo de 8 caracteres, com letras, números e símbolos; máximo de 72 bytes (limite do BCrypt); nova senha diferente da temporária |
@@ -70,6 +72,18 @@ As três migrations foram executadas num PostgreSQL 16 de teste, junto com o scr
 
 Enquanto o primeiro acesso não é concluído, as outras rotas respondem 403 com `codigo: PRIMEIRO_ACESSO_PENDENTE`.
 
+## Visual da tela de login
+
+Refeita no design aprovado na conversa "Visual do backoffice" (o artefato "Backoffice contábil"), sem logo nem cor de escritório:
+
+- **Esquerda:** fundo azul-marinho com a foto da mesa (`web/public/images/login-hero.jpg`) sob um véu, a marca genérica "Backoffice contábil", o título "Mais controle para o seu negócio." e os três itens com ícone
+- **Direita:** "Bem-vindo!", campos Usuário e Senha com ícone, botão de mostrar senha, "Manter-me conectado", "Esqueceu sua senha?", botão "Entrar", aviso de primeiro acesso e rodapé "Acesso restrito. Somente usuários autorizados."
+- **Estados:** validação de campo vazio ao enviar, erro (alerta vermelho com a mensagem da API) e carregando ("Entrando…")
+- **Cor de destaque:** a variável `--color-primary` (padrão `#1A6BDC`); o tema do contador a substitui depois do login
+- **Celular (até 899px):** o painel com a foto some e a marca aparece compacta no topo
+- **Fonte:** Figtree (Google Fonts, carregada no `index.html`)
+- A tela de primeiro acesso usa o mesmo layout, e `/recuperar-senha` é só uma página reservada para o link "Esqueceu sua senha?" até o módulo de recuperação existir
+
 ## Backend
 
 | Arquivo | O que faz |
@@ -92,9 +106,10 @@ Enquanto o primeiro acesso não é concluído, as outras rotas respondem 403 com
 | `services/api.ts` | Axios com cookie, Bearer automático e renovação do token ao receber 401 (uma só requisição de refresh por vez) |
 | `features/auth/AuthProvider` | Estado da sessão (`loading`, `anonymous`, `primeiro-acesso`, `authenticated`); recupera a sessão ao recarregar; carrega o tema após o login |
 | `features/auth/ProtectedRoute` | Protege `/app` e `/primeiro-acesso` |
-| `features/auth/AuthLayout` + `auth.css` | Layout dividido aprovado: foto à esquerda, formulário à direita |
+| `features/auth/AuthLayout` + `auth.css` + `icons.tsx` | Layout dividido aprovado: painel com foto à esquerda, formulário à direita |
 | `pages/login/LoginPage` | Tela de login genérica (sem marca de escritório) |
 | `pages/primeiro-acesso/PrimeiroAcessoPage` | Troca de senha com checklist da política + nome, e-mail e telefone |
+| `pages/recuperar-senha/RecuperarSenhaPage` | Página reservada do link "Esqueceu sua senha?" (recuperação ainda não existe) |
 | `pages/home/HomePage` | Mostra logo ou nome do tenant e o botão Sair |
 
 ## Configuração
@@ -123,12 +138,14 @@ Para outro usuário, copie o bloco e troque os valores. A logo do escritório va
 - [x] Front: `npm run build` (TypeScript estrito) e `oxlint` sem erros; política de senha do front conferida com casos de teste
 - [x] Java: sem erros de sintaxe (checado com `javac`)
 - [ ] **Backend compilar, subir e passar nos testes** (`mvn test`): não foi possível no ambiente de criação (o Maven Central é bloqueado lá). Rodar na sua máquina
-- [ ] Teste manual do fluxo completo no navegador (login → primeiro acesso → backoffice → recarregar página → sair)
+- [x] Visual do login conferido no Chromium em 1440, 820, 390 e 360 px (sem rolagem horizontal), com a API simulada: estados padrão, validação, erro e carregando, rota "Esqueceu sua senha?" e redirecionamento para o primeiro acesso
+- [ ] Teste manual do fluxo completo com o backend real (login → primeiro acesso → backoffice → recarregar página → sair)
 
 ## Pontos de atenção
 
 - Se o `mvn spring-boot:run` falhar ao subir, o mais provável é detalhe de mapeamento JPA (`ddl-auto: validate`) ou de API de biblioteca, já que o código não foi compilado no ambiente de criação. Mande o log.
-- A foto do login ainda não existe: coloque em `web/public/images/login-hero.jpg`. Sem ela aparece só o degradê (o `npm run build` avisa que não achou o arquivo; é esperado).
+- A foto da mesa tem um quadro com o texto "Organização gera mais resultados" e etiquetas nas pastas; o véu azul esmaece o quadro, mas ele ainda aparece levemente. Se incomodar, troque o arquivo `login-hero.jpg`.
+- A fonte Figtree vem do Google Fonts; sem internet o navegador usa a fonte padrão do sistema.
 - **Limite por IP não foi feito**: só o bloqueio por login. Atrás de proxy/balanceador o IP visto pelo servidor é o do proxy, e um limite por IP bloquearia todo mundo. Definir junto com a hospedagem.
 - Não há troca de senha nem recuperação de senha ainda; só o primeiro acesso.
 - Ao fazer um novo login, a sessão de refresh anterior continua válida até expirar (8h).

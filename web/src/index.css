@@ -13,32 +13,6 @@ body {
 
 /* ---------- Componentes base ---------- */
 
-.field {
-  display: grid;
-  gap: 6px;
-}
-
-.field__label {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.field__input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #ffffff;
-  color: inherit;
-  font: inherit;
-}
-
-.field__input:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
-  border-color: var(--color-primary);
-}
-
 .btn {
   padding: 11px 16px;
   border: 1px solid transparent;
@@ -58,24 +32,10 @@ body {
   outline-offset: 2px;
 }
 
-.btn--primary {
-  background: var(--color-primary);
-  color: #ffffff;
-}
-
 .btn--ghost {
   background: transparent;
   border-color: #d1d5db;
   color: inherit;
-}
-
-.form-error {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: #fef2f2;
-  color: #b91c1c;
-  font-size: 0.875rem;
 }
 
 .page-loading {

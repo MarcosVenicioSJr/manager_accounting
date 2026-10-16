@@ -10,5 +10,8 @@ public record LoginRequest(
 
         @NotBlank(message = "Informe a senha")
         @Size(max = 128, message = "Senha muito longa")
-        String senha) {
+        String senha,
+
+        /** "Manter-me conectado": o cookie de refresh sobrevive ao fechamento do navegador. Opcional. */
+        Boolean manterConectado) {
 }

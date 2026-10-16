@@ -51,7 +51,7 @@ npm run dev
 ## Login
 
 - Telas: `/login` (genérica) e `/primeiro-acesso` (troca da senha temporária + nome, e-mail e telefone)
-- A foto do lado esquerdo do login é o arquivo `web/public/images/login-hero.jpg` (sem ele aparece só o degradê)
+- Visual: o aprovado no design (painel azul-marinho com foto do escritório à esquerda, formulário à direita); a foto é `web/public/images/login-hero.jpg` e pode ser trocada
 - A logo de cada escritório fica em `web/public/tenants/<guid>/<arquivo>` e o nome do arquivo em `tenant_tema.logo_arquivo`
 - Como cadastrar tenants e usuários: [docs/sql/seed-dev.sql](docs/sql/seed-dev.sql)
 

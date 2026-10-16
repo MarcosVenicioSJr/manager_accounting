@@ -22,8 +22,16 @@ public class RefreshCookieFactory {
         this.properties = properties;
     }
 
-    public ResponseCookie criar(String refreshToken, Duration ttl) {
-        return base(refreshToken).maxAge(ttl).build();
+    /**
+     * @param persistente true ("manter conectado"): o cookie dura {@code ttl} mesmo com o navegador fechado;
+     *                    false: cookie de sessão, apagado quando o navegador fecha
+     */
+    public ResponseCookie criar(String refreshToken, Duration ttl, boolean persistente) {
+        ResponseCookie.ResponseCookieBuilder builder = base(refreshToken);
+        if (persistente) {
+            builder.maxAge(ttl);
+        }
+        return builder.build();
     }
 
     public ResponseCookie expirar() {

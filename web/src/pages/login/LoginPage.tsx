@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { FullPageLoading } from '../../components/FullPageLoading'
 import { AuthLayout } from '../../features/auth/AuthLayout'
+import { AlertIcon, EnterIcon, EyeIcon, EyeOffIcon, LockIcon, SpinnerIcon, UserIcon } from '../../features/auth/icons'
 import { useAuth } from '../../features/auth/useAuth'
 import { getErrorMessage } from '../../services/errors'
 
@@ -11,6 +12,8 @@ export function LoginPage() {
   const [usuario, setUsuario] = useState('')
   const [senha, setSenha] = useState('')
   const [mostrarSenha, setMostrarSenha] = useState(false)
+  const [manterConectado, setManterConectado] = useState(false)
+  const [tentouEnviar, setTentouEnviar] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -18,12 +21,18 @@ export function LoginPage() {
   if (status === 'authenticated') return <Navigate to="/app" replace />
   if (status === 'primeiro-acesso') return <Navigate to="/primeiro-acesso" replace />
 
+  const loginInvalido = tentouEnviar && !usuario.trim()
+  const senhaInvalida = tentouEnviar && !senha
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setTentouEnviar(true)
+    if (!usuario.trim() || !senha) return
+
     setErro(null)
     setEnviando(true)
     try {
-      await login(usuario.trim(), senha)
+      await login(usuario.trim(), senha, manterConectado)
     } catch (error) {
       setErro(getErrorMessage(error, 'Não foi possível entrar. Tente novamente.'))
       setEnviando(false)
@@ -31,60 +40,103 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Entrar" subtitle="Acesse o backoffice com seu login e senha.">
+    <AuthLayout>
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
-        <div className="field">
-          <label className="field__label" htmlFor="login">
-            Login
-          </label>
+        <h1 className="auth-title">Bem-vindo!</h1>
+        <p className="auth-subtitle">Faça login para acessar o sistema de contabilidade.</p>
+
+        {erro && (
+          <div className="auth-alert" role="alert">
+            <AlertIcon />
+            <span>{erro}</span>
+          </div>
+        )}
+
+        <label htmlFor="login" className="sr-only">
+          Usuário
+        </label>
+        <div className="auth-field" data-invalid={loginInvalido}>
+          <UserIcon />
           <input
             id="login"
-            className="field__input"
+            name="login"
+            className="auth-input"
             type="text"
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
-            required
+            placeholder="Usuário"
             autoFocus
             value={usuario}
             onChange={(event) => setUsuario(event.target.value)}
+            aria-invalid={loginInvalido}
+            aria-describedby={loginInvalido ? 'login-erro' : undefined}
           />
         </div>
-
-        <div className="field">
-          <label className="field__label" htmlFor="senha">
-            Senha
-          </label>
-          <div className="password-field">
-            <input
-              id="senha"
-              className="field__input"
-              type={mostrarSenha ? 'text' : 'password'}
-              autoComplete="current-password"
-              required
-              value={senha}
-              onChange={(event) => setSenha(event.target.value)}
-            />
-            <button
-              type="button"
-              className="password-field__toggle"
-              onClick={() => setMostrarSenha((atual) => !atual)}
-              aria-pressed={mostrarSenha}
-            >
-              {mostrarSenha ? 'Ocultar' : 'Mostrar'}
-            </button>
-          </div>
-        </div>
-
-        {erro && (
-          <p className="form-error" role="alert">
-            {erro}
+        {loginInvalido && (
+          <p id="login-erro" className="auth-field-error">
+            Informe seu usuário.
           </p>
         )}
 
-        <button className="btn btn--primary" type="submit" disabled={enviando || !usuario.trim() || !senha}>
-          {enviando ? 'Entrando…' : 'Entrar'}
+        <label htmlFor="senha" className="sr-only">
+          Senha
+        </label>
+        <div className="auth-field auth-field--with-action" data-invalid={senhaInvalida} style={{ marginTop: 16 }}>
+          <LockIcon />
+          <input
+            id="senha"
+            name="senha"
+            className="auth-input"
+            type={mostrarSenha ? 'text' : 'password'}
+            autoComplete="current-password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(event) => setSenha(event.target.value)}
+            aria-invalid={senhaInvalida}
+            aria-describedby={senhaInvalida ? 'senha-erro' : undefined}
+          />
+          <button
+            type="button"
+            className="auth-eye"
+            onClick={() => setMostrarSenha((atual) => !atual)}
+            aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+            aria-pressed={mostrarSenha}
+          >
+            {mostrarSenha ? <EyeOffIcon /> : <EyeIcon />}
+          </button>
+        </div>
+        {senhaInvalida && (
+          <p id="senha-erro" className="auth-field-error">
+            Informe sua senha.
+          </p>
+        )}
+
+        <div className="auth-options">
+          <label className="auth-remember">
+            <input
+              className="auth-check"
+              type="checkbox"
+              name="manter"
+              checked={manterConectado}
+              onChange={(event) => setManterConectado(event.target.checked)}
+            />
+            Manter-me conectado
+          </label>
+          <Link className="auth-link" to="/recuperar-senha">
+            Esqueceu sua senha?
+          </Link>
+        </div>
+
+        <button className="auth-submit" type="submit" disabled={enviando} aria-busy={enviando}>
+          {enviando ? <SpinnerIcon /> : <EnterIcon />}
+          <span>{enviando ? 'Entrando…' : 'Entrar'}</span>
         </button>
+
+        <p className="auth-note">
+          <strong>Primeiro acesso?</strong> Entre com a senha temporária que você recebeu. Em seguida, você
+          cria uma nova senha e completa seus dados.
+        </p>
       </form>
     </AuthLayout>
   )

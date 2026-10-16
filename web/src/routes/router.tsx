@@ -3,10 +3,12 @@ import { PrimeiroAcessoRoute, ProtectedRoute } from '../features/auth/ProtectedR
 import { HomePage } from '../pages/home/HomePage'
 import { LoginPage } from '../pages/login/LoginPage'
 import { PrimeiroAcessoPage } from '../pages/primeiro-acesso/PrimeiroAcessoPage'
+import { RecuperarSenhaPage } from '../pages/recuperar-senha/RecuperarSenhaPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
   { path: '/login', element: <LoginPage /> },
+  { path: '/recuperar-senha', element: <RecuperarSenhaPage /> },
   {
     path: '/primeiro-acesso',
     element: (

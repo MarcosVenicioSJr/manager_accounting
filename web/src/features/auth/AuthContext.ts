@@ -7,7 +7,7 @@ export type AuthStatus = 'loading' | 'anonymous' | 'primeiro-acesso' | 'authenti
 
 export type AuthContextValue = {
   status: AuthStatus
-  login: (usuario: string, senha: string) => Promise<void>
+  login: (usuario: string, senha: string, manterConectado: boolean) => Promise<void>
   concluirPrimeiroAcesso: (dados: PrimeiroAcessoDados) => Promise<void>
   logout: () => Promise<void>
 }

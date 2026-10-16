@@ -34,9 +34,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResult result = authService.login(request.login(), request.senha());
+        boolean manterConectado = Boolean.TRUE.equals(request.manterConectado());
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE,
-                        cookieFactory.criar(result.refreshToken(), refreshTokenService.getTtl()).toString())
+                        cookieFactory.criar(result.refreshToken(), refreshTokenService.getTtl(), manterConectado)
+                                .toString())
                 .body(result.response());
     }
 

@@ -55,8 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [setTheme])
 
   const login = useCallback(
-    async (usuario: string, senha: string) => {
-      const resposta = await authService.login(usuario, senha)
+    async (usuario: string, senha: string, manterConectado: boolean) => {
+      const resposta = await authService.login(usuario, senha, manterConectado)
       await aplicarSessao(resposta)
     },
     [aplicarSessao],
