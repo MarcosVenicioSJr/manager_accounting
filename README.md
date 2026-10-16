@@ -47,3 +47,4 @@ npm run dev
 ## Documentação
 
 - [Arquitetura e decisões](docs/arquitetura.md)
+- [Cérebro do projeto (notas para o Obsidian)](docs/cerebro/)
