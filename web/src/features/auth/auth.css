@@ -1,0 +1,111 @@
+.auth-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.auth-hero {
+  display: flex;
+  align-items: flex-end;
+  padding: 40px;
+  color: #ffffff;
+  /* Camadas, de cima para baixo: véu escuro, foto (opcional) e degradê de reserva */
+  background:
+    linear-gradient(160deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.45)),
+    url('/images/login-hero.jpg') center / cover no-repeat,
+    linear-gradient(160deg, #0f172a, var(--color-primary));
+}
+
+.auth-hero__brand {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: #ffffff;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-card__title {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.auth-card__subtitle {
+  margin: 0 0 24px;
+  color: #4b5563;
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.auth-card__subtitle + .auth-form {
+  margin-top: 0;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field .field__input {
+  padding-right: 88px;
+}
+
+.password-field__toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.password-rules {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.password-rules__item--ok {
+  color: #047857;
+}
+
+.password-rules__item::before {
+  content: '○ ';
+}
+
+.password-rules__item--ok::before {
+  content: '✓ ';
+}
+
+@media (max-width: 900px) {
+  .auth-split {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-hero {
+    display: none;
+  }
+}

@@ -17,6 +17,23 @@ Backoffice multi-tenant (white-label) para contadores organizarem seus clientes.
 | Recuperação de senha | Usuário digita o login, recebe por e-mail um token de confirmação e, com o token válido, define a nova senha |
 | Política de senha | Mínimo de 8 caracteres, com letras, números e símbolos |
 | E-mail | Mailpit no Docker em desenvolvimento; provedor SMTP de produção definido na publicação |
+| Access token | JWT HS256 de 4 horas, só com `userId` e `tenantId` (além de iat/exp); fica em memória no front |
+| Refresh token | Opaco, 8 horas fixas (sem renovação), em cookie `HttpOnly` + `SameSite=Strict` restrito a `/api/auth`; no banco só o hash SHA-256 |
+| Senha | BCrypt; a senha temporária é guardada em `senha_hash` e substituída no primeiro acesso (sem coluna de senha temporária) |
+| Proteção do login | 5 senhas erradas bloqueiam o usuário por 15 minutos; mensagem de erro sempre genérica |
+
+## Endpoints de autenticação
+
+| Método e rota | Acesso | Resposta |
+|---|---|---|
+| `POST /api/auth/login` | Público | `{ accessToken, expiresIn, primeiroAcessoPendente }` + cookie `refresh_token` |
+| `POST /api/auth/refresh` | Cookie de refresh | `{ accessToken, expiresIn, primeiroAcessoPendente }` |
+| `POST /api/auth/logout` | Cookie de refresh | 204, revoga a sessão e apaga o cookie |
+| `POST /api/auth/primeiro-acesso` | Bearer, só com primeiro acesso pendente | 204 |
+| `GET /api/tenant/tema` | Bearer, primeiro acesso concluído | `{ nomeEmpresa, logoUrl, corPrimaria, corSecundaria }` |
+
+Enquanto o primeiro acesso não é concluído, qualquer outra rota responde 403 com `codigo: PRIMEIRO_ACESSO_PENDENTE`.
+A cada requisição o filtro JWT confere no banco se o usuário e o tenant continuam ativos.
 
 ## Estrutura
 
