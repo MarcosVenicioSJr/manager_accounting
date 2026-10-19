@@ -71,6 +71,12 @@ public class RefreshTokenService {
         repository.findByTokenHash(hash(token)).ifPresent(stored -> stored.revogar(agora));
     }
 
+    /** Derruba todas as sessões do usuário em todos os navegadores. */
+    @Transactional
+    public void revogarTodos(Long usuarioId) {
+        repository.revogarTodosDoUsuario(usuarioId, clock.instant());
+    }
+
     /** Limpeza diária das sessões expiradas há mais de um dia. */
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional

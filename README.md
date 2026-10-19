@@ -55,6 +55,13 @@ npm run dev
 - A logo de cada escritório fica em `web/public/tenants/<guid>/<arquivo>` e o nome do arquivo em `tenant_tema.logo_arquivo`
 - Como cadastrar tenants e usuários: [docs/sql/seed-dev.sql](docs/sql/seed-dev.sql)
 
+## Recuperação de senha
+
+- Telas: `/recuperar-senha` (informa o usuário) e `/redefinir-senha` (aberta pelo link do e-mail)
+- O link vai para o e-mail cadastrado no primeiro acesso; quem ainda não fez o primeiro acesso usa a senha temporária
+- Em desenvolvimento os e-mails aparecem no Mailpit: http://localhost:8025
+- Para testar: entre com `contador.exemplo`, conclua o primeiro acesso, saia e use "Esqueceu sua senha?"
+
 ## Documentação
 
 - [Arquitetura e decisões](docs/arquitetura.md)

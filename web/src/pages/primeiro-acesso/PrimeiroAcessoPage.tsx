@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { AuthLayout } from '../../features/auth/AuthLayout'
-import { AlertIcon, EyeIcon, EyeOffIcon, SpinnerIcon } from '../../features/auth/icons'
-import { checarSenha, senhaValida } from '../../features/auth/passwordPolicy'
+import { AlertIcon, SpinnerIcon } from '../../features/auth/icons'
+import { NovaSenhaFields } from '../../features/auth/NovaSenhaFields'
+import { senhaValida } from '../../features/auth/passwordPolicy'
 import { useAuth } from '../../features/auth/useAuth'
 import { getErrorMessage } from '../../services/errors'
 
@@ -13,11 +14,9 @@ export function PrimeiroAcessoPage() {
   const [telefone, setTelefone] = useState('')
   const [novaSenha, setNovaSenha] = useState('')
   const [confirmacao, setConfirmacao] = useState('')
-  const [mostrarSenha, setMostrarSenha] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
-  const checks = checarSenha(novaSenha)
   const senhasConferem = novaSenha === confirmacao
   const telefoneDigitos = telefone.replace(/\D/g, '')
   const formularioValido =
@@ -45,13 +44,6 @@ export function PrimeiroAcessoPage() {
       setEnviando(false)
     }
   }
-
-  const regras: { ok: boolean; texto: string }[] = [
-    { ok: checks.tamanho, texto: 'Pelo menos 8 caracteres' },
-    { ok: checks.letra, texto: 'Letras' },
-    { ok: checks.numero, texto: 'Números' },
-    { ok: checks.simbolo, texto: 'Símbolos (por exemplo ! @ # $ %)' },
-  ]
 
   return (
     <AuthLayout>
@@ -123,59 +115,12 @@ export function PrimeiroAcessoPage() {
           </div>
         </div>
 
-        <div>
-          <label className="auth-label" htmlFor="novaSenha">
-            Nova senha
-          </label>
-          <div className="auth-field auth-field--with-action">
-            <input
-              id="novaSenha"
-              className="auth-input"
-              type={mostrarSenha ? 'text' : 'password'}
-              autoComplete="new-password"
-              value={novaSenha}
-              onChange={(event) => setNovaSenha(event.target.value)}
-              aria-describedby="regras-senha"
-            />
-            <button
-              type="button"
-              className="auth-eye"
-              onClick={() => setMostrarSenha((atual) => !atual)}
-              aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
-              aria-pressed={mostrarSenha}
-            >
-              {mostrarSenha ? <EyeOffIcon /> : <EyeIcon />}
-            </button>
-          </div>
-          <ul id="regras-senha" className="auth-rules">
-            {regras.map((regra) => (
-              <li key={regra.texto} className={`auth-rules__item${regra.ok ? ' auth-rules__item--ok' : ''}`}>
-                {regra.texto}
-              </li>
-            ))}
-          </ul>
-          {!checks.limite && <p className="auth-field-error">A senha é longa demais (máximo de 72 bytes).</p>}
-        </div>
-
-        <div>
-          <label className="auth-label" htmlFor="confirmacao">
-            Confirmar nova senha
-          </label>
-          <div className="auth-field">
-            <input
-              id="confirmacao"
-              className="auth-input"
-              type={mostrarSenha ? 'text' : 'password'}
-              autoComplete="new-password"
-              value={confirmacao}
-              onChange={(event) => setConfirmacao(event.target.value)}
-              aria-invalid={confirmacao.length > 0 && !senhasConferem}
-            />
-          </div>
-          {confirmacao.length > 0 && !senhasConferem && (
-            <p className="auth-field-error">As senhas não conferem.</p>
-          )}
-        </div>
+        <NovaSenhaFields
+          novaSenha={novaSenha}
+          onNovaSenhaChange={setNovaSenha}
+          confirmacao={confirmacao}
+          onConfirmacaoChange={setConfirmacao}
+        />
 
         <button
           className="auth-submit auth-submit--spaced"

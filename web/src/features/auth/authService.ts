@@ -22,3 +22,20 @@ export async function logout(): Promise<void> {
 export async function concluirPrimeiroAcesso(dados: PrimeiroAcessoDados): Promise<void> {
   await api.post('/auth/primeiro-acesso', dados)
 }
+
+// ---------- Esqueceu sua senha? ----------
+
+// A resposta é sempre a mesma, exista ou não o usuário (o backend não revela quem está cadastrado).
+export async function solicitarRecuperacaoSenha(usuario: string): Promise<string> {
+  const { data } = await api.post<{ mensagem: string }>('/auth/recuperar-senha', { login: usuario })
+  return data.mensagem
+}
+
+// O token vai no corpo, nunca na URL da API, para não ficar em logs de servidor.
+export async function validarLinkRedefinicao(token: string): Promise<void> {
+  await api.post('/auth/redefinir-senha/validar', { token })
+}
+
+export async function redefinirSenha(token: string, novaSenha: string): Promise<void> {
+  await api.post('/auth/redefinir-senha', { token, novaSenha })
+}

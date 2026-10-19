@@ -17,6 +17,7 @@ import br.com.manageraccounting.modules.usuario.UsuarioRepository;
  * Segurança da API: stateless, autenticação por JWT (header Authorization: Bearer).
  * <ul>
  *   <li>login, refresh e logout são públicos (o refresh token vai em cookie HttpOnly);</li>
+ *   <li>a recuperação de senha ("Esqueceu sua senha?") é pública;</li>
  *   <li>primeiro-acesso exige estar logado com a senha temporária ({@code ROLE_PRIMEIRO_ACESSO});</li>
  *   <li>todo o resto exige um contador com o primeiro acesso concluído ({@code ROLE_CONTADOR}).</li>
  * </ul>
@@ -42,7 +43,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.POST,
-                                "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
+                                "/api/auth/login", "/api/auth/refresh", "/api/auth/logout",
+                                "/api/auth/recuperar-senha", "/api/auth/redefinir-senha",
+                                "/api/auth/redefinir-senha/validar").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/primeiro-acesso").hasRole("PRIMEIRO_ACESSO")
                         .anyRequest().hasRole("CONTADOR"))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, usuarioRepository),

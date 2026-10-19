@@ -4,11 +4,14 @@ import { HomePage } from '../pages/home/HomePage'
 import { LoginPage } from '../pages/login/LoginPage'
 import { PrimeiroAcessoPage } from '../pages/primeiro-acesso/PrimeiroAcessoPage'
 import { RecuperarSenhaPage } from '../pages/recuperar-senha/RecuperarSenhaPage'
+import { RedefinirSenhaPage } from '../pages/redefinir-senha/RedefinirSenhaPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/recuperar-senha', element: <RecuperarSenhaPage /> },
+  // Aberta pelo link do e-mail (/redefinir-senha#token=...)
+  { path: '/redefinir-senha', element: <RedefinirSenhaPage /> },
   {
     path: '/primeiro-acesso',
     element: (

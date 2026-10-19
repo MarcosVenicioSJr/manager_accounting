@@ -25,6 +25,16 @@ spring:
     port: ${MAIL_PORT:1025}
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:false}
+          # Tempo máximo (ms) para não prender a fila de envio se o SMTP estiver fora do ar
+          connectiontimeout: 5000
+          timeout: 10000
+          writetimeout: 10000
 
 server:
   port: ${SERVER_PORT:8080}
@@ -38,8 +48,12 @@ management:
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  web:
+    # Endereço do front, usado nos links dos e-mails (ex.: link de redefinição de senha)
+    base-url: ${WEB_BASE_URL:http://localhost:5173}
   mail:
     from: ${MAIL_FROM:no-reply@manageraccounting.local}
+    from-name: ${MAIL_FROM_NAME:Backoffice contábil}
   security:
     jwt:
       # Obrigatório (mínimo 32 caracteres). Sem valor o backend não sobe.
@@ -51,3 +65,9 @@ app:
       # Em produção (HTTPS) mantenha secure=true
       secure: ${REFRESH_COOKIE_SECURE:true}
       same-site: ${REFRESH_COOKIE_SAME_SITE:Strict}
+    recuperacao-senha:
+      # Validade do link enviado por e-mail
+      token-ttl: ${RECUPERACAO_SENHA_TOKEN_TTL:30m}
+      # Por usuário: tempo mínimo entre dois e-mails e máximo de e-mails por hora
+      intervalo-minimo: ${RECUPERACAO_SENHA_INTERVALO_MINIMO:2m}
+      max-envios-por-hora: ${RECUPERACAO_SENHA_MAX_ENVIOS_POR_HORA:5}

@@ -19,6 +19,7 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 |---|---|---|---|---|
 | 001 | [[001 - Estrutura inicial do projeto]] | 2026-10-15 | Estrutura | Concluído |
 | 002 | [[002 - Modulo de login]] | 2026-10-15 | Autenticação | Em revisão (branch `feature/login`) |
+| 003 | [[003 - Recuperacao de senha]] | 2026-10-19 | Autenticação | Em revisão (branch `feature/recuperacao-senha`) |
 
 ## Módulos
 
@@ -26,7 +27,7 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 |---|---|
 | Estrutura do projeto | Concluído |
 | Autenticação: login e primeiro acesso | Em revisão (branch `feature/login`) |
-| Autenticação: recuperação de senha | Próximo |
+| Autenticação: recuperação de senha | Em revisão (branch `feature/recuperacao-senha`) |
 | Tenants e tema | Pendente |
 | Clientes | Pendente |
 | App do cliente (React Native) | Pendente |
