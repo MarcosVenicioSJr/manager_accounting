@@ -5,6 +5,7 @@ import { useAuth } from '../../features/auth/useAuth'
 import { buscarResumo } from '../../features/clientes/clienteService'
 import type { ClientesResumo } from '../../features/clientes/types'
 import { useTenantTheme } from '../../hooks/useTenantTheme'
+import { PageHeader } from '../../layouts/PageHeader'
 import './inicio.css'
 
 function saudacao(agora = new Date()) {
@@ -12,6 +13,13 @@ function saudacao(agora = new Date()) {
   if (hora < 12) return 'Bom dia'
   if (hora < 18) return 'Boa tarde'
   return 'Boa noite'
+}
+
+const HOJE = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
+
+// "segunda-feira, 19 de outubro"
+function hojePorExtenso() {
+  return HOJE.format(new Date())
 }
 
 // Página inicial do backoffice: saudação e os números da carteira de clientes.
@@ -36,20 +44,23 @@ export function InicioPage() {
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h1 className="page-head__title">
-            {saudacao()}
-            {primeiroNome ? `, ${primeiroNome}` : ''}
-          </h1>
-          <p className="page-head__subtitle">{theme.tenantName} · resumo do escritório</p>
-        </div>
-        <div className="page-head__actions">
+      <PageHeader
+        titulo="Visão geral"
+        subtitulo={`${theme.tenantName} · resumo do escritório`}
+        acoes={
           <Link to="/app/clientes/novo" className="ui-btn ui-btn--primary">
             <PlusIcon width={18} height={18} />
             Novo cliente
           </Link>
-        </div>
+        }
+      />
+
+      <div className="page-intro">
+        <h2 className="page-intro__title">
+          {saudacao()}
+          {primeiroNome ? `, ${primeiroNome}` : ''}
+        </h2>
+        <p className="page-intro__text">{hojePorExtenso()}</p>
       </div>
 
       <section className="panel ini-carteira" aria-labelledby="ini-carteira-titulo">

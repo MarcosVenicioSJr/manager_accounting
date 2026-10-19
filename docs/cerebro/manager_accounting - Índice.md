@@ -23,6 +23,7 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 | 004 | [[004 - Area logada e tema do escritorio]] | 2026-10-19 | Backoffice | Em revisão (branch `feature/area-logada-clientes`) |
 | 005 | [[005 - Clientes]] | 2026-10-19 | Clientes | Em revisão (branch `feature/area-logada-clientes`) |
 | 006 | [[006 - Logo e cores do ILLUM]] | 2026-10-19 | Tenants | Concluído (direto na `main`) |
+| 007 | [[007 - Layout do backoffice]] | 2026-10-19 | Backoffice | Em revisão (branch `feature/layout-backoffice`) |
 
 ## Módulos
 

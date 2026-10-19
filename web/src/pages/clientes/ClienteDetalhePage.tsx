@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { AlertIcon, ArrowLeftIcon, BanIcon, RefreshIcon } from '../../components/icons'
+import { useParams } from 'react-router-dom'
+import { AlertIcon, BanIcon, RefreshIcon } from '../../components/icons'
 import { ConfirmDialog } from '../../components/ui/Dialog'
 import { useToast } from '../../components/ui/useToast'
 import { AcessoAppCard } from '../../features/clientes/AcessoAppCard'
@@ -16,6 +16,7 @@ import { formatarDocumento } from '../../features/clientes/documento'
 import { formatarDataHora } from '../../features/clientes/formatar'
 import type { Cliente } from '../../features/clientes/types'
 import '../../features/clientes/clientes.css'
+import { PageHeader } from '../../layouts/PageHeader'
 import { getErrorMessage, getErrorStatus } from '../../services/errors'
 import { NaoEncontradoPage } from '../nao-encontrado/NaoEncontradoPage'
 
@@ -24,6 +25,8 @@ type Estado =
   | { tipo: 'erro'; mensagem: string }
   | { tipo: 'nao-encontrado' }
   | { tipo: 'ok'; cliente: Cliente }
+
+const VOLTAR = { para: '/app/clientes', rotulo: 'Voltar para clientes' }
 
 // A página recomeça do zero (estado "carregando") ao trocar de cliente.
 export function ClienteDetalhePage() {
@@ -81,7 +84,7 @@ function ClienteDetalhe({ id }: { id: string }) {
   if (estado.tipo === 'erro') {
     return (
       <>
-        <VoltarParaClientes />
+        <PageHeader titulo="Cliente" voltar={VOLTAR} />
         <div className="ui-alert ui-alert--error" role="alert">
           <AlertIcon />
           <div className="ui-alert__content">
@@ -100,11 +103,9 @@ function ClienteDetalhe({ id }: { id: string }) {
   if (!cliente) {
     return (
       <>
-        <VoltarParaClientes />
+        <PageHeader titulo="Carregando cliente…" voltar={VOLTAR} />
         <div className="cl-detail-loading" role="status" aria-label="Carregando cliente">
-          <span className="ui-skeleton" style={{ width: 280, height: 28 }} />
-          <span className="ui-skeleton" style={{ width: 180 }} />
-          <span className="ui-skeleton" style={{ width: '100%', height: 220, marginTop: 24 }} />
+          <span className="ui-skeleton" style={{ width: '100%', height: 220 }} />
         </div>
       </>
     )
@@ -133,24 +134,23 @@ function ClienteDetalhe({ id }: { id: string }) {
 
   return (
     <>
-      <VoltarParaClientes />
-      <div className="page-head">
-        <div className="cl-detail-title">
-          <h1 className="page-head__title">{cliente.nome}</h1>
-          <p className="page-head__subtitle">
+      <PageHeader
+        titulo={cliente.nome}
+        voltar={VOLTAR}
+        subtitulo={
+          <>
             <span className="cl-mono">{formatarDocumento(cliente.documento, cliente.tipoPessoa)}</span>
-            <span aria-hidden="true"> · </span>
-            {cliente.tipoPessoa === 'JURIDICA' ? 'Pessoa jurídica' : 'Pessoa física'}
-            {' '}
+            <span aria-hidden="true">·</span>
+            <span>{cliente.tipoPessoa === 'JURIDICA' ? 'Pessoa jurídica' : 'Pessoa física'}</span>
             {cliente.ativo ? (
               <span className="badge badge--ok">Ativo</span>
             ) : (
               <span className="badge badge--off">Inativo</span>
             )}
-          </p>
-        </div>
-        <div className="page-head__actions">
-          {cliente.ativo ? (
+          </>
+        }
+        acoes={
+          cliente.ativo ? (
             <button type="button" className="ui-btn ui-btn--danger-outline" onClick={() => setConfirmarStatus(true)}>
               <BanIcon width={18} height={18} />
               Desativar cliente
@@ -160,9 +160,9 @@ function ClienteDetalhe({ id }: { id: string }) {
               <RefreshIcon width={18} height={18} />
               Reativar cliente
             </button>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       <div className="cl-detail">
         <ClienteForm
@@ -243,13 +243,4 @@ function estadoDeErro(error: unknown): Estado {
   return getErrorStatus(error) === 404
     ? { tipo: 'nao-encontrado' }
     : { tipo: 'erro', mensagem: getErrorMessage(error, 'Não foi possível carregar o cliente.') }
-}
-
-function VoltarParaClientes() {
-  return (
-    <Link to="/app/clientes" className="page-back">
-      <ArrowLeftIcon width={16} height={16} />
-      Clientes
-    </Link>
-  )
 }

@@ -543,21 +543,6 @@ select.cf-input {
   gap: var(--space-4);
 }
 
-.cl-detail-title {
-  min-width: 0;
-}
-
-.cl-detail-title .page-head__title {
-  overflow-wrap: anywhere;
-}
-
-.cl-detail-title .page-head__subtitle {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 6px;
-}
-
 .cl-detail-loading {
   display: flex;
   flex-direction: column;
@@ -689,7 +674,7 @@ select.cf-input {
   letter-spacing: 0.1em;
 }
 
-.not-found h1 {
+.not-found h2 {
   margin: var(--space-2) 0 0;
   font-size: 22px;
   font-weight: 600;
