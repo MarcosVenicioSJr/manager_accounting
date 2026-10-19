@@ -9,6 +9,6 @@ export type TenantTheme = {
 export const defaultTheme: TenantTheme = {
   tenantName: 'Manager Accounting',
   logoUrl: null,
-  primaryColor: '#1f2937',
+  primaryColor: '#1A6BDC',
   secondaryColor: '#6b7280',
 }

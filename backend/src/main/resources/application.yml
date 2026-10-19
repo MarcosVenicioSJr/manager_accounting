@@ -40,3 +40,14 @@ app:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   mail:
     from: ${MAIL_FROM:no-reply@manageraccounting.local}
+  security:
+    jwt:
+      # Obrigatório (mínimo 32 caracteres). Sem valor o backend não sobe.
+      # Em desenvolvimento ("mvn spring-boot:run") vem do application-dev.yml.
+      secret: ${JWT_SECRET:}
+      access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:4h}
+      refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:8h}
+    refresh-cookie:
+      # Em produção (HTTPS) mantenha secure=true
+      secure: ${REFRESH_COOKIE_SECURE:true}
+      same-site: ${REFRESH_COOKIE_SAME_SITE:Strict}
