@@ -86,6 +86,21 @@ public class Usuario {
         this.primeiroAcessoConcluido = true;
     }
 
+    /**
+     * Troca a senha pelo fluxo "Esqueceu sua senha?". Também zera as tentativas erradas e tira o bloqueio,
+     * já que a pessoa provou ter acesso ao e-mail cadastrado.
+     */
+    public void redefinirSenha(String novoSenhaHash) {
+        this.senhaHash = novoSenhaHash;
+        this.tentativasFalhas = 0;
+        this.bloqueadoAte = null;
+    }
+
+    /** Só quem já concluiu o primeiro acesso tem e-mail cadastrado para receber o link. */
+    public boolean podeRecuperarSenhaPorEmail() {
+        return ativo && primeiroAcessoConcluido && email != null && !email.isBlank();
+    }
+
     public Long getId() {
         return id;
     }

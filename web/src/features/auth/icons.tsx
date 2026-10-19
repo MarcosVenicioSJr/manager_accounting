@@ -127,3 +127,30 @@ export function TrendIcon(props: IconProps) {
     </Icon>
   )
 }
+
+export function MailIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="3" y="5.5" width="18" height="13" rx="2" />
+      <path d="M3.8 7l8.2 6 8.2-6" />
+    </Icon>
+  )
+}
+
+export function CheckCircleIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth="1.8" {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.2 12.3l2.6 2.6 5-5.3" />
+    </Icon>
+  )
+}
+
+export function ArrowLeftIcon(props: IconProps) {
+  return (
+    <Icon width="18" height="18" strokeWidth="1.8" {...props}>
+      <path d="M19 12H5" />
+      <path d="M11 6l-6 6 6 6" />
+    </Icon>
+  )
+}

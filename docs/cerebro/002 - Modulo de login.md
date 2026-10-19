@@ -21,7 +21,7 @@ tags:
 
 # 002 - Módulo de login
 
-Voltar para [[manager_accounting - Índice]] · Anterior: [[001 - Estrutura inicial do projeto]]
+Voltar para [[manager_accounting - Índice]] · Anterior: [[001 - Estrutura inicial do projeto]] · Próximo: [[003 - Recuperacao de senha]]
 
 ## Resumo
 
@@ -147,9 +147,9 @@ Para outro usuário, copie o bloco e troque os valores. A logo do escritório va
 - A foto da mesa tem um quadro com o texto "Organização gera mais resultados" e etiquetas nas pastas; o véu azul esmaece o quadro, mas ele ainda aparece levemente. Se incomodar, troque o arquivo `login-hero.jpg`.
 - A fonte Figtree vem do Google Fonts; sem internet o navegador usa a fonte padrão do sistema.
 - **Limite por IP não foi feito**: só o bloqueio por login. Atrás de proxy/balanceador o IP visto pelo servidor é o do proxy, e um limite por IP bloquearia todo mundo. Definir junto com a hospedagem.
-- Não há troca de senha nem recuperação de senha ainda; só o primeiro acesso.
+- Não há troca de senha pelo usuário logado ainda; a recuperação por e-mail está no [[003 - Recuperacao de senha]].
 - Ao fazer um novo login, a sessão de refresh anterior continua válida até expirar (8h).
 
 ## Próximo passo
 
-Recuperação de senha: digitar o login, enviar o token de confirmação por e-mail (Mailpit no Docker) e, com o token válido, abrir o campo da nova senha.
+Recuperação de senha: feita no [[003 - Recuperacao de senha]].

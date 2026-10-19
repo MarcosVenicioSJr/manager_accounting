@@ -346,6 +346,10 @@
     transform 0.05s;
 }
 
+a.auth-submit {
+  text-decoration: none;
+}
+
 .auth-submit--spaced {
   margin-top: 12px;
 }
@@ -382,6 +386,72 @@
 .auth-note strong {
   font-weight: 600;
   color: #0f1f38;
+}
+
+/* ---------- Recuperação de senha: estados (e-mail enviado, link inválido, senha alterada) ---------- */
+
+.auth-status-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 24px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-primary) 12%, white);
+  color: var(--color-primary);
+}
+
+.auth-status-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.auth-status-icon--ok {
+  background: #e3f5ec;
+  color: #047857;
+}
+
+.auth-status-icon--erro {
+  background: #fdecea;
+  color: #c0352b;
+}
+
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+  margin-top: 28px;
+}
+
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 6px;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #5b6b82;
+}
+
+.auth-text-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.auth-text-button:hover {
+  text-decoration: underline;
+}
+
+.auth-text-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .auth-rules {
