@@ -62,6 +62,13 @@ npm run dev
 - Em desenvolvimento os e-mails aparecem no Mailpit: http://localhost:8025
 - Para testar: entre com `contador.exemplo`, conclua o primeiro acesso, saia e use "Esqueceu sua senha?"
 
+## Backoffice e clientes
+
+- Depois do login: `/app` (início), `/app/clientes` (lista), `/app/clientes/novo` e `/app/clientes/:id`
+- O menu lateral usa a cor e a logo do escritório (`tenant_tema`); as cores passam por ajuste de contraste
+- O `seed-dev.sql` cadastra 5 clientes de exemplo no Escritório Exemplo
+- Na tela do cliente, "Gerar token de acesso" cria o token do app do cliente (aparece uma única vez)
+
 ## Documentação
 
 - [Arquitetura e decisões](docs/arquitetura.md)

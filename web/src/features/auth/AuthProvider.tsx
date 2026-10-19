@@ -3,6 +3,7 @@ import { refreshSession, setSessionExpiredHandler } from '../../services/api'
 import { defaultTheme } from '../../theme/theme'
 import { useTenantTheme } from '../../hooks/useTenantTheme'
 import { buscarTema } from '../tenant/tenantService'
+import { buscarUsuarioLogado, type UsuarioLogado } from '../usuario/usuarioService'
 import { AuthContext, type AuthContextValue, type AuthStatus } from './AuthContext'
 import * as authService from './authService'
 import { tokenStore } from './tokenStore'
@@ -12,13 +13,14 @@ import type { AuthResponse, PrimeiroAcessoDados } from './types'
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { setTheme } = useTenantTheme()
   const [status, setStatus] = useState<AuthStatus>('loading')
+  const [usuario, setUsuario] = useState<UsuarioLogado | null>(null)
 
+  // Tema do escritório e dados do contador, em paralelo. Se um falhar, o backoffice abre mesmo assim
+  // (tema neutro e o login no lugar do nome).
   const carregarTema = useCallback(async () => {
-    try {
-      setTheme(await buscarTema())
-    } catch {
-      // Sem tema do tenant, fica o padrão neutro
-    }
+    const [tema, eu] = await Promise.allSettled([buscarTema(), buscarUsuarioLogado()])
+    if (tema.status === 'fulfilled') setTheme(tema.value)
+    setUsuario(eu.status === 'fulfilled' ? eu.value : null)
   }, [setTheme])
 
   const aplicarSessao = useCallback(
@@ -49,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionExpiredHandler(() => {
       tokenStore.set(null)
       setTheme(defaultTheme)
+      setUsuario(null)
       setStatus('anonymous')
     })
     return () => setSessionExpiredHandler(null)
@@ -74,12 +77,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     await authService.logout()
     setTheme(defaultTheme)
+    setUsuario(null)
     setStatus('anonymous')
   }, [setTheme])
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, login, concluirPrimeiroAcesso, logout }),
-    [status, login, concluirPrimeiroAcesso, logout],
+    () => ({ status, usuario, login, concluirPrimeiroAcesso, logout }),
+    [status, usuario, login, concluirPrimeiroAcesso, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

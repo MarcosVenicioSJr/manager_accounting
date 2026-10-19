@@ -1,0 +1,131 @@
+/* Página inicial: uma faixa com os números da carteira, separados por réguas finas. */
+
+.ini-carteira {
+  padding: var(--space-5);
+}
+
+.ini-carteira__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.ini-carteira__head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.ini-link {
+  color: var(--color-primary-strong);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ini-link:hover {
+  text-decoration: underline;
+}
+
+.ini-link:focus-visible,
+.ini-numero__valor:focus-visible {
+  outline: 2px solid var(--color-primary-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ini-numeros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: var(--space-5) 0 0;
+}
+
+.ini-numero {
+  padding: 0 var(--space-5);
+  border-left: 1px solid var(--line);
+}
+
+.ini-numero:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.ini-numero dt {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+.ini-numero dd {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 6px 0 0;
+}
+
+.ini-numero__valor {
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+
+a.ini-numero__valor:hover {
+  color: var(--color-primary-strong);
+}
+
+.ini-numero__detalhe {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.ini-carteira__msg {
+  margin: var(--space-2) 0 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.ini-vazio {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.ini-vazio__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-primary-strong) 10%, white);
+  color: var(--color-primary-strong);
+}
+
+.ini-vazio__titulo {
+  margin: 4px 0 0;
+  font-weight: 600;
+}
+
+@media (max-width: 599px) {
+  .ini-numeros {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ini-numero,
+  .ini-numero:first-child {
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .ini-numero:first-child {
+    border-top: 0;
+  }
+}
