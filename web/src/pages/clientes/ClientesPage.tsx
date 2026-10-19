@@ -14,6 +14,7 @@ import { formatarDocumento } from '../../features/clientes/documento'
 import { mascararTelefone, pluralizar } from '../../features/clientes/formatar'
 import type { ClienteListaItem, Pagina, StatusFiltro } from '../../features/clientes/types'
 import '../../features/clientes/clientes.css'
+import { PageHeader } from '../../layouts/PageHeader'
 import { getErrorMessage } from '../../services/errors'
 
 const STATUS: { valor: StatusFiltro; rotulo: string }[] = [
@@ -110,20 +111,16 @@ export function ClientesPage() {
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h1 className="page-head__title">Clientes</h1>
-          <p className="page-head__subtitle">
-            {resultado && !carregando ? pluralizar(total, 'cliente encontrado', 'clientes encontrados') : ' '}
-          </p>
-        </div>
-        <div className="page-head__actions">
+      <PageHeader
+        titulo="Clientes"
+        subtitulo={resultado && !carregando ? pluralizar(total, 'cliente encontrado', 'clientes encontrados') : 'Carregando…'}
+        acoes={
           <Link to="/app/clientes/novo" className="ui-btn ui-btn--primary">
             <PlusIcon width={18} height={18} />
             Novo cliente
           </Link>
-        </div>
-      </div>
+        }
+      />
 
       <div className="cl-toolbar">
         <div className="cl-search">

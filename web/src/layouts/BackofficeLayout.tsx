@@ -1,28 +1,55 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { ChevronDownIcon, CloseIcon, HomeIcon, LogoutIcon, MenuIcon, UsersIcon } from '../components/icons'
+import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, HomeIcon, LogoutIcon, MenuIcon, UsersIcon } from '../components/icons'
 import { useAuth } from '../features/auth/useAuth'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { useTenantTheme } from '../hooks/useTenantTheme'
 import { iniciais } from '../utils/texto'
+import { HeaderSlotContext } from './headerSlot'
 import './backoffice.css'
 
 const NAV = [
-  { to: '/app', label: 'Início', icon: HomeIcon, end: true },
+  { to: '/app', label: 'Visão geral', icon: HomeIcon, end: true },
   { to: '/app/clientes', label: 'Clientes', icon: UsersIcon, end: false },
 ]
 
-// Layout do backoffice: menu lateral com a marca do escritório, cabeçalho com o escritório e o contador,
-// e a página atual no meio. No celular o menu vira uma gaveta aberta pelo botão do cabeçalho.
+const CHAVE_RECOLHIDO = 'bo.menuRecolhido'
+
+// Preferência de menu recolhido, só deste navegador. Se o armazenamento falhar, o menu abre expandido.
+function lerRecolhido(): boolean {
+  try {
+    return window.localStorage.getItem(CHAVE_RECOLHIDO) === '1'
+  } catch {
+    return false
+  }
+}
+
+function salvarRecolhido(valor: boolean) {
+  try {
+    window.localStorage.setItem(CHAVE_RECOLHIDO, valor ? '1' : '0')
+  } catch {
+    // Sem armazenamento: vale só até recarregar
+  }
+}
+
+// Layout do backoffice. Menu lateral: marca do escritório no topo, navegação, contador e "Sair" no rodapé,
+// e o botão de recolher. Cabeçalho fixo com o título e as ações da página (cada página usa <PageHeader>).
+// No celular e no tablet o menu vira uma gaveta aberta pelo botão do cabeçalho (e não recolhe).
 export function BackofficeLayout() {
   const { theme } = useTenantTheme()
+  const { usuario, logout } = useAuth()
   const [menuAberto, setMenuAberto] = useState(false)
+  const [recolhidoPreferido, setRecolhidoPreferido] = useState(lerRecolhido)
+  const [saindo, setSaindo] = useState(false)
   // Endereço da logo que não carregou (arquivo ausente): nesse caso aparece o monograma
   const [logoComErro, setLogoComErro] = useState<string | null>(null)
+  const [slot, setSlot] = useState<HTMLDivElement | null>(null)
   const gaveta = useMediaQuery('(max-width: 959px)')
   const fecharRef = useRef<HTMLButtonElement>(null)
   const abrirRef = useRef<HTMLButtonElement>(null)
   const estavaAberto = useRef(false)
+
+  const recolhido = recolhidoPreferido && !gaveta
 
   // Foco vai para dentro da gaveta ao abrir e volta para o botão do menu ao fechar
   useEffect(() => {
@@ -40,10 +67,27 @@ export function BackofficeLayout() {
     return () => document.removeEventListener('keydown', onKey)
   }, [menuAberto])
 
+  function alternarRecolhido() {
+    setRecolhidoPreferido((atual) => {
+      salvarRecolhido(!atual)
+      return !atual
+    })
+  }
+
+  async function sair() {
+    setSaindo(true)
+    try {
+      await logout()
+    } finally {
+      setSaindo(false)
+    }
+  }
+
   const mostrarLogo = Boolean(theme.logoUrl) && theme.logoUrl !== logoComErro
+  const nomeUsuario = usuario?.nomeCompleto || usuario?.login || 'Contador'
 
   return (
-    <div className="bo" data-menu-aberto={menuAberto}>
+    <div className="bo" data-menu-aberto={menuAberto} data-recolhido={recolhido}>
       <a href="#conteudo" className="bo-skip">
         Pular para o conteúdo
       </a>
@@ -59,7 +103,7 @@ export function BackofficeLayout() {
             <img
               className="bo-brand__logo"
               src={theme.logoUrl ?? undefined}
-              alt={theme.tenantName}
+              alt=""
               onError={() => setLogoComErro(theme.logoUrl)}
             />
           ) : (
@@ -67,7 +111,12 @@ export function BackofficeLayout() {
               {iniciais(theme.tenantName)}
             </span>
           )}
-          {!mostrarLogo && <span className="bo-brand__name">{theme.tenantName}</span>}
+          <div className="bo-brand__text">
+            <span className="bo-brand__name" title={theme.tenantName}>
+              {theme.tenantName}
+            </span>
+            <span className="bo-brand__tagline">Gestão de clientes</span>
+          </div>
           <button
             ref={fecharRef}
             type="button"
@@ -81,15 +130,57 @@ export function BackofficeLayout() {
 
         <nav className="bo-nav">
           {NAV.map(({ to, label, icon: ItemIcon, end }) => (
-            // Escolher um item fecha a gaveta no celular
-            <NavLink key={to} to={to} end={end} className="bo-nav__item" onClick={() => setMenuAberto(false)}>
+            // Escolher um item fecha a gaveta no celular. Recolhido, o nome vira dica e rótulo acessível.
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className="bo-nav__item"
+              onClick={() => setMenuAberto(false)}
+              title={recolhido ? label : undefined}
+              aria-label={recolhido ? label : undefined}
+            >
               <ItemIcon />
-              <span>{label}</span>
+              <span className="bo-nav__label">{label}</span>
             </NavLink>
           ))}
         </nav>
 
-        <p className="bo-sidebar__foot">Backoffice contábil</p>
+        <div className="bo-account">
+          <div className="bo-account__user" title={recolhido ? nomeUsuario : undefined}>
+            <span className="bo-avatar" aria-hidden="true">
+              {iniciais(nomeUsuario)}
+            </span>
+            <div className="bo-account__text">
+              <span className="bo-account__name">{nomeUsuario}</span>
+              <span className="bo-account__detail">{usuario?.email || usuario?.login || 'Contador'}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="bo-account__logout"
+            onClick={() => void sair()}
+            disabled={saindo}
+            title={recolhido ? 'Sair' : undefined}
+            aria-label={recolhido ? 'Sair' : undefined}
+          >
+            <LogoutIcon width={16} height={16} />
+            <span className="bo-nav__label">{saindo ? 'Saindo…' : 'Sair'}</span>
+          </button>
+        </div>
+
+        <div className="bo-collapse">
+          <button
+            type="button"
+            className="bo-collapse__button"
+            onClick={alternarRecolhido}
+            aria-label={recolhido ? 'Expandir menu' : 'Recolher menu'}
+            aria-pressed={recolhido}
+            title={recolhido ? 'Expandir menu' : 'Recolher menu'}
+          >
+            {recolhido ? <ChevronRightIcon width={16} height={16} /> : <ChevronLeftIcon width={16} height={16} />}
+          </button>
+        </div>
       </aside>
 
       <button
@@ -112,83 +203,16 @@ export function BackofficeLayout() {
           >
             <MenuIcon />
           </button>
-          <div className="bo-header__office">
-            <span className="bo-header__office-label">Escritório</span>
-            <span className="bo-header__office-name">{theme.tenantName}</span>
-          </div>
-          <UserMenu />
+          {/* Título e ações da página entram aqui (PageHeader) */}
+          <div className="bo-header__slot" ref={setSlot} />
         </header>
 
         <main id="conteudo" className="bo-main" tabIndex={-1}>
-          <Outlet />
+          <HeaderSlotContext.Provider value={slot}>
+            <Outlet />
+          </HeaderSlotContext.Provider>
         </main>
       </div>
-    </div>
-  )
-}
-
-function UserMenu() {
-  const { usuario, logout } = useAuth()
-  const [aberto, setAberto] = useState(false)
-  const [saindo, setSaindo] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!aberto) return
-    const onClick = (event: MouseEvent) => {
-      if (!ref.current?.contains(event.target as Node)) setAberto(false)
-    }
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setAberto(false)
-    }
-    document.addEventListener('mousedown', onClick)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onClick)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [aberto])
-
-  const nome = usuario?.nomeCompleto || usuario?.login || 'Contador'
-  const primeiroNome = nome.split(/\s+/)[0]
-
-  async function sair() {
-    setSaindo(true)
-    try {
-      await logout()
-    } finally {
-      setSaindo(false)
-    }
-  }
-
-  return (
-    <div className="bo-user" ref={ref}>
-      <button
-        type="button"
-        className="bo-user__button"
-        aria-haspopup="menu"
-        aria-expanded={aberto}
-        onClick={() => setAberto((v) => !v)}
-      >
-        <span className="bo-avatar" aria-hidden="true">
-          {iniciais(nome)}
-        </span>
-        <span className="bo-user__name">{primeiroNome}</span>
-        <ChevronDownIcon width={16} height={16} />
-      </button>
-      {aberto && (
-        <div className="bo-user__menu" role="menu">
-          <div className="bo-user__info">
-            <strong>{nome}</strong>
-            {usuario?.email && <span>{usuario.email}</span>}
-            {usuario?.login && <span className="bo-user__login">Usuário: {usuario.login}</span>}
-          </div>
-          <button type="button" role="menuitem" className="bo-user__item" onClick={() => void sair()} disabled={saindo}>
-            <LogoutIcon width={18} height={18} />
-            {saindo ? 'Saindo…' : 'Sair'}
-          </button>
-        </div>
-      )}
     </div>
   )
 }

@@ -1,10 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeftIcon } from '../../components/icons'
+import { useNavigate } from 'react-router-dom'
 import { useToast } from '../../components/ui/useToast'
 import { ClienteForm } from '../../features/clientes/ClienteForm'
 import { VALORES_NOVO } from '../../features/clientes/clienteFormValores'
 import { criarCliente } from '../../features/clientes/clienteService'
 import '../../features/clientes/clientes.css'
+import { PageHeader } from '../../layouts/PageHeader'
 
 export function NovoClientePage() {
   const navigate = useNavigate()
@@ -12,16 +12,11 @@ export function NovoClientePage() {
 
   return (
     <>
-      <Link to="/app/clientes" className="page-back">
-        <ArrowLeftIcon width={16} height={16} />
-        Clientes
-      </Link>
-      <div className="page-head">
-        <div>
-          <h1 className="page-head__title">Novo cliente</h1>
-          <p className="page-head__subtitle">Depois de salvar você pode liberar o acesso do cliente ao app.</p>
-        </div>
-      </div>
+      <PageHeader
+        titulo="Novo cliente"
+        subtitulo="Depois de salvar você pode liberar o acesso do cliente ao app."
+        voltar={{ para: '/app/clientes', rotulo: 'Voltar para clientes' }}
+      />
 
       <div className="cl-form-page">
         <ClienteForm
