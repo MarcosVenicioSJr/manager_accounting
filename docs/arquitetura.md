@@ -21,6 +21,9 @@ Backoffice multi-tenant (white-label) para contadores organizarem seus clientes.
 | Refresh token | Opaco, 8 horas fixas (sem renovação), em cookie `HttpOnly` + `SameSite=Strict` restrito a `/api/auth`; no banco só o hash SHA-256 |
 | Senha | BCrypt; a senha temporária é guardada em `senha_hash` e substituída no primeiro acesso (sem coluna de senha temporária) |
 | Proteção do login | 5 senhas erradas bloqueiam o usuário por 15 minutos; mensagem de erro sempre genérica |
+| Tema no backoffice | Cores do tenant passam por um ajuste de contraste (WCAG AA) antes de virar variáveis CSS; menu lateral na primária escurecida |
+| Clientes | Isolados por `tenant_id`; CPF/CNPJ único por tenant (aceita CNPJ alfanumérico); edição com controle de versão; desativação em vez de exclusão |
+| Token do app do cliente | 16 caracteres Base32 Crockford (`XXXX-XXXX-XXXX-XXXX`), só o hash SHA-256 no banco, um ativo por cliente, mostrado uma única vez |
 
 ## Endpoints de autenticação
 
@@ -31,6 +34,20 @@ Backoffice multi-tenant (white-label) para contadores organizarem seus clientes.
 | `POST /api/auth/logout` | Cookie de refresh | 204, revoga a sessão e apaga o cookie |
 | `POST /api/auth/primeiro-acesso` | Bearer, só com primeiro acesso pendente | 204 |
 | `GET /api/tenant/tema` | Bearer, primeiro acesso concluído | `{ nomeEmpresa, logoUrl, corPrimaria, corSecundaria }` |
+
+## Endpoints do backoffice
+
+| Método e rota | Resposta |
+|---|---|
+| `GET /api/usuario/me` | `{ login, nomeCompleto, email }` do contador logado |
+| `GET /api/clientes?busca=&status=ATIVOS\|INATIVOS\|TODOS&pagina=0&tamanho=20` | Página de clientes do tenant |
+| `GET /api/clientes/resumo` | `{ ativos, inativos, comAcessoApp }` |
+| `GET /api/clientes/{id}` | Cliente + situação do acesso ao app |
+| `POST /api/clientes` · `PUT /api/clientes/{id}` | Cadastro e edição (409 `DOCUMENTO_DUPLICADO` / `EDICAO_SIMULTANEA`) |
+| `POST /api/clientes/{id}/desativar` · `/reativar` | 204 |
+| `POST /api/clientes/{id}/acesso-app` · `DELETE` | Gera (token só nesta resposta) ou revoga o token do app |
+
+Cliente de outro tenant responde 404, igual a um id inexistente. Detalhes em `docs/cerebro/005 - Clientes.md`.
 
 Enquanto o primeiro acesso não é concluído, qualquer outra rota responde 403 com `codigo: PRIMEIRO_ACESSO_PENDENTE`.
 A cada requisição o filtro JWT confere no banco se o usuário e o tenant continuam ativos.
@@ -49,13 +66,15 @@ manager_accounting/
 │       └── modules/
 │           ├── auth/       Login, primeiro acesso, recuperação de senha
 │           ├── tenant/     Escritórios e tema
-│           └── usuario/    Contadores
+│           ├── usuario/    Contadores
+│           └── cliente/    Clientes do contador e token do app
 ├── web/                    React + TypeScript (Vite)
 │   └── src/
 │       ├── app/            Componente raiz
 │       ├── routes/         Rotas
-│       ├── pages/          Telas (login, home)
-│       ├── components/     Componentes compartilhados
+│       ├── layouts/        Layout do backoffice (menu lateral e cabeçalho)
+│       ├── pages/          Telas (login, início, clientes)
+│       ├── components/     Ícones e componentes base (diálogo, avisos)
 │       ├── features/       Lógica por módulo
 │       ├── services/       Cliente HTTP
 │       ├── theme/          Tema do tenant
