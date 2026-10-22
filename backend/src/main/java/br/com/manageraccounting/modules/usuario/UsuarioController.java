@@ -25,6 +25,7 @@ public class UsuarioController {
     public UsuarioLogadoResponse me(@AuthenticationPrincipal AuthenticatedUser user) {
         Usuario usuario = usuarioRepository.findAtivoById(user.userId())
                 .orElseThrow(() -> new UnauthorizedException("Sessão inválida"));
-        return new UsuarioLogadoResponse(usuario.getLogin(), usuario.getNomeCompleto(), usuario.getEmail());
+        return new UsuarioLogadoResponse(usuario.getLogin(), usuario.getNomeCompleto(), usuario.getEmail(),
+                usuario.getPerfil());
     }
 }

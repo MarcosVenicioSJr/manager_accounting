@@ -26,6 +26,6 @@ SET cor_primaria = EXCLUDED.cor_primaria,
 --
 -- Para entrar como ILLUM, cadastre um usuário nesse tenant (mesmo modelo do seed-dev.sql):
 --
---   INSERT INTO usuario (tenant_id, login, senha_hash)
---   SELECT id, 'contador.illum', crypt('Temp@1234', gen_salt('bf', 10))
+--   INSERT INTO usuario (tenant_id, login, senha_hash, perfil)
+--   SELECT id, 'contador.illum', crypt('Temp@1234', gen_salt('bf', 10)), 'ADMIN'
 --   FROM tenant WHERE guid = '20911ebb-5ac2-4e81-866d-b79e1de891e4';

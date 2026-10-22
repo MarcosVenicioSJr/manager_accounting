@@ -25,7 +25,8 @@ import jakarta.servlet.http.HttpServletResponse;
  * <p>
  * A cada requisição o usuário e o tenant são conferidos no banco: usuário ou tenant desativado perde o acesso
  * na hora, e quem ainda não concluiu o primeiro acesso recebe apenas a autoridade {@code ROLE_PRIMEIRO_ACESSO}
- * (só pode chamar o endpoint de primeiro acesso).
+ * (só pode chamar o endpoint de primeiro acesso). O administrador do escritório recebe também {@code ROLE_ADMIN};
+ * como o perfil é lido do banco, mudar o perfil vale na próxima requisição.
  * <p>
  * Não é um bean: é criado dentro do {@link SecurityConfig}, para não ser registrado duas vezes pelo servlet container.
  */
@@ -33,6 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     static final String ROLE_CONTADOR = "ROLE_CONTADOR";
     static final String ROLE_PRIMEIRO_ACESSO = "ROLE_PRIMEIRO_ACESSO";
+    /** Administrador do escritório (perfil ADMIN), além de ROLE_CONTADOR. Lido do banco a cada requisição. */
+    static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     private static final String BEARER_PREFIX = "Bearer ";
 
@@ -72,12 +75,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         Usuario user = usuario.get();
-        String authority = user.isPrimeiroAcessoConcluido() ? ROLE_CONTADOR : ROLE_PRIMEIRO_ACESSO;
+        List<SimpleGrantedAuthority> authorities;
+        if (!user.isPrimeiroAcessoConcluido()) {
+            authorities = List.of(new SimpleGrantedAuthority(ROLE_PRIMEIRO_ACESSO));
+        } else if (user.isAdmin()) {
+            authorities = List.of(new SimpleGrantedAuthority(ROLE_CONTADOR), new SimpleGrantedAuthority(ROLE_ADMIN));
+        } else {
+            authorities = List.of(new SimpleGrantedAuthority(ROLE_CONTADOR));
+        }
 
         UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
                 new AuthenticatedUser(user.getId(), user.getTenantId()),
                 null,
-                List.of(new SimpleGrantedAuthority(authority)));
+                authorities);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);

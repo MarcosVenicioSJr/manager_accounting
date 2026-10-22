@@ -25,6 +25,7 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 | 006 | [[006 - Logo e cores do ILLUM]] | 2026-10-19 | Tenants | Concluído (direto na `main`) |
 | 007 | [[007 - Layout do backoffice]] | 2026-10-19 | Backoffice | Em revisão (branch `feature/layout-backoffice`) |
 | 008 | [[008 - Meu perfil]] | 2026-10-21 | Perfil | Em revisão (branch `feature/meu-perfil`) |
+| 009 | [[009 - Usuarios do escritorio]] | 2026-10-21 | Usuários | Em revisão (branch `feature/usuarios-escritorio`) |
 
 ## Módulos
 
@@ -36,4 +37,6 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 | Área logada e tema do escritório | Em revisão (branch `feature/area-logada-clientes`) |
 | Clientes (cadastro e token do app) | Em revisão (branch `feature/area-logada-clientes`) |
 | Meu perfil (dados, troca de senha e de e-mail confirmadas por e-mail) | Em revisão (branch `feature/meu-perfil`) |
+| Usuários do escritório (perfis e convite) | Em revisão (branch `feature/usuarios-escritorio`) |
+| Tema e logo pelo backoffice | Descartado: cores e logo só pelo banco e pelo projeto web |
 | App do cliente (React Native) | Pendente |

@@ -3,6 +3,7 @@ import { AlertIcon, CheckIcon, CopyIcon, KeyIcon, PhoneIcon } from '../../compon
 import { ConfirmDialog, Dialog } from '../../components/ui/Dialog'
 import { useToast } from '../../components/ui/useToast'
 import { getErrorMessage } from '../../services/errors'
+import { useAuth } from '../auth/useAuth'
 import { gerarAcessoApp, revogarAcessoApp } from './clienteService'
 import { formatarDataHora } from './formatar'
 import type { Cliente, TokenGerado } from './types'
@@ -22,6 +23,8 @@ export function AcessoAppCard({ cliente, onAlterado }: AcessoAppCardProps) {
   const [processando, setProcessando] = useState(false)
   const [tokenGerado, setTokenGerado] = useState<TokenGerado | null>(null)
   const acesso = cliente.acessoApp
+  // Revogar é só do administrador; gerar (e gerar de novo) vale para todos
+  const ehAdmin = useAuth().usuario?.perfil === 'ADMIN'
 
   async function gerar() {
     setProcessando(true)
@@ -64,7 +67,10 @@ export function AcessoAppCard({ cliente, onAlterado }: AcessoAppCardProps) {
       </div>
 
       {!cliente.ativo ? (
-        <p className="side-card__text">Cliente inativo. Reative o cliente para liberar o acesso ao app.</p>
+        <p className="side-card__text">
+          Cliente inativo. {ehAdmin ? 'Reative o cliente' : 'Um administrador precisa reativar o cliente'} para
+          liberar o acesso ao app.
+        </p>
       ) : acesso.ativo ? (
         <>
           <p className="side-card__status side-card__status--ok">
@@ -89,13 +95,15 @@ export function AcessoAppCard({ cliente, onAlterado }: AcessoAppCardProps) {
               <KeyIcon width={16} height={16} />
               Gerar novo token
             </button>
-            <button
-              type="button"
-              className="ui-btn ui-btn--danger-outline ui-btn--sm"
-              onClick={() => setConfirmacao('revogar')}
-            >
-              Revogar acesso
-            </button>
+            {ehAdmin && (
+              <button
+                type="button"
+                className="ui-btn ui-btn--danger-outline ui-btn--sm"
+                onClick={() => setConfirmacao('revogar')}
+              >
+                Revogar acesso
+              </button>
+            )}
           </div>
         </>
       ) : (

@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, HomeIcon, LogoutIcon, MenuIcon, UsersIcon } from '../components/icons'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  HomeIcon,
+  LogoutIcon,
+  MenuIcon,
+  ShieldIcon,
+  UsersIcon,
+} from '../components/icons'
 import { useAuth } from '../features/auth/useAuth'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { useTenantTheme } from '../hooks/useTenantTheme'
@@ -9,8 +18,9 @@ import { HeaderSlotContext } from './headerSlot'
 import './backoffice.css'
 
 const NAV = [
-  { to: '/app', label: 'Visão geral', icon: HomeIcon, end: true },
-  { to: '/app/clientes', label: 'Clientes', icon: UsersIcon, end: false },
+  { to: '/app', label: 'Visão geral', icon: HomeIcon, end: true, soAdmin: false },
+  { to: '/app/clientes', label: 'Clientes', icon: UsersIcon, end: false, soAdmin: false },
+  { to: '/app/usuarios', label: 'Usuários', icon: ShieldIcon, end: false, soAdmin: true },
 ]
 
 const CHAVE_RECOLHIDO = 'bo.menuRecolhido'
@@ -129,7 +139,7 @@ export function BackofficeLayout() {
         </div>
 
         <nav className="bo-nav">
-          {NAV.map(({ to, label, icon: ItemIcon, end }) => (
+          {NAV.filter((item) => !item.soAdmin || usuario?.perfil === 'ADMIN').map(({ to, label, icon: ItemIcon, end }) => (
             // Escolher um item fecha a gaveta no celular. Recolhido, o nome vira dica e rótulo acessível.
             <NavLink
               key={to}

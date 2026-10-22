@@ -78,3 +78,9 @@ app:
       # Por usuário e por tipo: tempo mínimo entre dois pedidos e máximo de pedidos por hora
       intervalo-minimo: ${PERFIL_CONFIRMACAO_INTERVALO_MINIMO:1m}
       max-envios-por-hora: ${PERFIL_CONFIRMACAO_MAX_ENVIOS_POR_HORA:5}
+  equipe:
+    convite:
+      # Validade do link que o usuário convidado usa para criar a senha
+      validade: ${EQUIPE_CONVITE_VALIDADE:48h}
+      # Tempo mínimo entre dois envios para o mesmo usuário (reenviar convite)
+      intervalo-minimo: ${EQUIPE_CONVITE_INTERVALO_MINIMO:1m}

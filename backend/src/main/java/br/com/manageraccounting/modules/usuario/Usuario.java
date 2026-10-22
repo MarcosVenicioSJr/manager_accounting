@@ -5,6 +5,8 @@ import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -55,7 +57,51 @@ public class Usuario {
     @Column(name = "data_inclusao", nullable = false, updatable = false)
     private Instant dataInclusao;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private PerfilAcesso perfil;
+
     protected Usuario() {
+    }
+
+    /**
+     * Usuário convidado por um administrador: login reservado, nome e e-mail já informados e uma senha aleatória
+     * que ninguém conhece. Ele cria a senha e conclui o primeiro acesso pelo link do convite.
+     */
+    public static Usuario convidado(Long tenantId, String login, String senhaHashAleatoria, String nomeCompleto,
+            String email, PerfilAcesso perfil, Instant agora) {
+        Usuario usuario = new Usuario();
+        usuario.tenantId = tenantId;
+        usuario.login = login;
+        usuario.senhaHash = senhaHashAleatoria;
+        usuario.nomeCompleto = nomeCompleto;
+        usuario.email = email;
+        usuario.perfil = perfil;
+        usuario.ativo = true;
+        usuario.primeiroAcessoConcluido = false;
+        usuario.dataInclusao = agora;
+        return usuario;
+    }
+
+    public boolean isAdmin() {
+        return perfil == PerfilAcesso.ADMIN;
+    }
+
+    /** Administrador que consegue agir no sistema agora (ativo e com o primeiro acesso concluído). */
+    public boolean isAdminEmAtividade() {
+        return isAdmin() && ativo && primeiroAcessoConcluido;
+    }
+
+    public void alterarPerfil(PerfilAcesso novoPerfil) {
+        this.perfil = novoPerfil;
+    }
+
+    public void desativar() {
+        this.ativo = false;
+    }
+
+    public void reativar() {
+        this.ativo = true;
     }
 
     public boolean estaBloqueado(Instant agora) {
@@ -158,5 +204,9 @@ public class Usuario {
 
     public Instant getDataInclusao() {
         return dataInclusao;
+    }
+
+    public PerfilAcesso getPerfil() {
+        return perfil;
     }
 }

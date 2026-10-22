@@ -20,6 +20,9 @@ import br.com.manageraccounting.modules.usuario.UsuarioRepository;
  *   <li>a recuperação de senha ("Esqueceu sua senha?") é pública;</li>
  *   <li>a confirmação de troca de senha/e-mail pelo link do e-mail é pública (o token é a prova);</li>
  *   <li>primeiro-acesso exige estar logado com a senha temporária ({@code ROLE_PRIMEIRO_ACESSO});</li>
+ *   <li>o aceite do convite de usuário é público (o token do e-mail é a prova);</li>
+ *   <li>usuários do escritório, desativar/reativar cliente e revogar o acesso ao app exigem o administrador
+ *   do escritório ({@code ROLE_ADMIN});</li>
  *   <li>todo o resto exige um contador com o primeiro acesso concluído ({@code ROLE_CONTADOR}).</li>
  * </ul>
  * CSRF fica desligado porque nenhum endpoint aceita autenticação por cookie além de refresh/logout, e esses
@@ -47,8 +50,14 @@ public class SecurityConfig {
                                 "/api/auth/login", "/api/auth/refresh", "/api/auth/logout",
                                 "/api/auth/recuperar-senha", "/api/auth/redefinir-senha",
                                 "/api/auth/redefinir-senha/validar",
-                                "/api/auth/confirmar-alteracao", "/api/auth/confirmar-alteracao/validar").permitAll()
+                                "/api/auth/confirmar-alteracao", "/api/auth/confirmar-alteracao/validar",
+                                "/api/auth/convite/validar", "/api/auth/convite/aceitar").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/primeiro-acesso").hasRole("PRIMEIRO_ACESSO")
+                        // Só o administrador do escritório
+                        .requestMatchers("/api/usuarios", "/api/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/clientes/*/desativar", "/api/clientes/*/reativar")
+                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/clientes/*/acesso-app").hasRole("ADMIN")
                         .anyRequest().hasRole("CONTADOR"))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, usuarioRepository),
                         UsernamePasswordAuthenticationFilter.class)

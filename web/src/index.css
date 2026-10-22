@@ -412,3 +412,61 @@ body {
     bottom: 16px;
   }
 }
+
+/* ---------- Menu de ações da linha ---------- */
+
+.ui-rowmenu {
+  position: relative;
+  display: inline-block;
+}
+
+.ui-rowmenu__button {
+  width: 36px;
+  height: 36px;
+  color: var(--ink-2);
+}
+
+.ui-rowmenu__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 30;
+  min-width: 220px;
+  padding: var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 16px 40px rgba(10, 18, 32, 0.14);
+}
+
+.ui-rowmenu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 38px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ui-rowmenu__item:hover,
+.ui-rowmenu__item:focus-visible {
+  background: var(--surface-2);
+  outline: none;
+}
+
+.ui-rowmenu__item:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-primary-strong);
+}
+
+.ui-rowmenu__item--danger {
+  color: var(--danger);
+}

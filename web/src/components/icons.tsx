@@ -143,6 +143,14 @@ export const ArrowLeftIcon = (p: IconProps) => (
   </Icon>
 )
 
+export const ShieldIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3.5 5 6.3v5.4c0 4.2 2.9 7.6 7 8.8 4.1-1.2 7-4.6 7-8.8V6.3z" />
+    <circle cx="12" cy="10.5" r="2.2" />
+    <path d="M8.6 16c.7-1.6 1.9-2.4 3.4-2.4s2.7.8 3.4 2.4" />
+  </Icon>
+)
+
 export const MailIcon = (p: IconProps) => (
   <Icon {...p}>
     <rect x="3.5" y="5.5" width="17" height="13" rx="2" />

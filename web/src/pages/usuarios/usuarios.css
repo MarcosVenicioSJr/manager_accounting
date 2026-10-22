@@ -1,0 +1,115 @@
+/* Usuários do escritório (reaproveita tabela e selos dos clientes). */
+
+.us-intro {
+  max-width: 760px;
+  margin: 0 0 var(--space-4);
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.us-table tbody tr {
+  cursor: default;
+}
+
+.us-table tbody tr:hover {
+  background: transparent;
+}
+
+.us-name {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.us-voce {
+  height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+.us-badge-admin {
+  background: color-mix(in srgb, var(--color-primary-strong) 12%, white);
+  color: var(--color-primary-strong);
+}
+
+.us-badge-pending {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.us-pending {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.us-actions {
+  width: 56px;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.us-table-wrap {
+  overflow: visible;
+}
+
+.us-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.us-empty p {
+  margin: 0;
+}
+
+.us-empty .cl-empty__icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+
+.us-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.us-form > p {
+  margin: 0;
+}
+
+.us-perfil {
+  margin: 0;
+}
+
+/* Celular: o menu de ações fica no canto do cartão */
+@media (max-width: 719px) {
+  .us-row {
+    position: relative;
+  }
+
+  .us-table td.us-actions {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    display: block;
+    width: auto;
+    padding: 0;
+  }
+
+  .us-table td.us-actions::before {
+    content: none;
+  }
+
+  .us-table td:first-child {
+    padding-right: 44px;
+  }
+}
