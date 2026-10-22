@@ -33,6 +33,7 @@ import br.com.manageraccounting.core.exception.NotFoundException;
 import br.com.manageraccounting.modules.cliente.dto.ClienteListaItem;
 import br.com.manageraccounting.modules.cliente.dto.ClienteRequest;
 import br.com.manageraccounting.modules.cliente.dto.ClienteResponse;
+import br.com.manageraccounting.modules.cliente.dto.EnderecoDto;
 import br.com.manageraccounting.modules.cliente.dto.PaginaResponse;
 import br.com.manageraccounting.modules.cliente.dto.TokenGeradoResponse;
 
@@ -62,7 +63,7 @@ class ClienteServiceTest {
     void criarUsaOTenantDoTokenENormalizaOsDados() {
         ClienteResponse criado = service.criar(TENANT, new ClienteRequest(TipoPessoa.JURIDICA,
                 "11.222.333/0001-81", "  Padaria Pão Quente LTDA ", " Pão Quente ", " Contato@PaoQuente.com.br ",
-                "(85) 98888-7777", RegimeTributario.SIMPLES_NACIONAL, "   ", null));
+                "(85) 98888-7777", RegimeTributario.SIMPLES_NACIONAL, "   ", null, null));
 
         ArgumentCaptor<Cliente> captor = ArgumentCaptor.forClass(Cliente.class);
         verify(clienteRepository).saveAndFlush(captor.capture());
@@ -82,7 +83,7 @@ class ClienteServiceTest {
     @Test
     void pessoaFisicaDescartaNomeFantasiaERegime() {
         service.criar(TENANT, new ClienteRequest(TipoPessoa.FISICA, "529.982.247-25", "Maria Souza",
-                "Fantasia", null, null, RegimeTributario.MEI, null, null));
+                "Fantasia", null, null, RegimeTributario.MEI, null, null, null));
 
         ArgumentCaptor<Cliente> captor = ArgumentCaptor.forClass(Cliente.class);
         verify(clienteRepository).saveAndFlush(captor.capture());
@@ -114,7 +115,7 @@ class ClienteServiceTest {
     @Test
     void telefoneSemDdd() {
         ClienteRequest request = new ClienteRequest(TipoPessoa.JURIDICA, CNPJ, "Empresa", null, null,
-                "98888-777", null, null, null);
+                "98888-777", null, null, null, null);
 
         assertThatThrownBy(() -> service.criar(TENANT, request)).isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Telefone inválido");
@@ -123,7 +124,7 @@ class ClienteServiceTest {
     @Test
     void nomeSoComEspacos() {
         ClienteRequest request = new ClienteRequest(TipoPessoa.JURIDICA, CNPJ, "   ", null, null, null, null,
-                null, null);
+                null, null, null);
 
         assertThatThrownBy(() -> service.criar(TENANT, request)).isInstanceOf(BusinessException.class);
     }
@@ -131,10 +132,48 @@ class ClienteServiceTest {
     @Test
     void documentoInvalido() {
         ClienteRequest request = new ClienteRequest(TipoPessoa.JURIDICA, "11222333000182", "Empresa", null, null,
-                null, null, null, null);
+                null, null, null, null, null);
 
         assertThatThrownBy(() -> service.criar(TENANT, request)).isInstanceOf(BusinessException.class)
                 .hasMessage("CNPJ inválido.");
+    }
+
+    // ---------- endereço e busca ----------
+
+    @Test
+    void enderecoNormalizado() {
+        service.criar(TENANT, new ClienteRequest(TipoPessoa.JURIDICA, CNPJ, "Empresa", null, null, null, null, null,
+                null, new EnderecoDto("60.115-170", " Av. Santos Dumont ", "1500", " ", "Aldeota", "Fortaleza", "ce")));
+
+        ArgumentCaptor<Cliente> captor = ArgumentCaptor.forClass(Cliente.class);
+        verify(clienteRepository).saveAndFlush(captor.capture());
+        EnderecoDto endereco = captor.getValue().getEndereco();
+        assertThat(endereco.cep()).isEqualTo("60115170");
+        assertThat(endereco.logradouro()).isEqualTo("Av. Santos Dumont");
+        assertThat(endereco.complemento()).isNull();
+        assertThat(endereco.uf()).isEqualTo("CE");
+    }
+
+    @Test
+    void enderecoInvalido() {
+        assertThatThrownBy(() -> ClienteService.normalizarEndereco(
+                new EnderecoDto("6011517", null, null, null, null, null, null)))
+                .hasMessageContaining("CEP");
+        assertThatThrownBy(() -> ClienteService.normalizarEndereco(
+                new EnderecoDto(null, null, null, null, null, null, "XX")))
+                .hasMessageContaining("UF");
+        assertThat(ClienteService.normalizarEndereco(null).cep()).isNull();
+    }
+
+    @Test
+    void textoDeBuscaSemAcentos() {
+        service.criar(TENANT, new ClienteRequest(TipoPessoa.FISICA, "529.982.247-25", "João Conceição", null,
+                "Joao@Exemplo.com", null, null, null, null, null));
+
+        ArgumentCaptor<Cliente> captor = ArgumentCaptor.forClass(Cliente.class);
+        verify(clienteRepository).saveAndFlush(captor.capture());
+        assertThat(captor.getValue().getBusca()).isEqualTo("joao conceicao joao@exemplo.com");
+        assertThat(TextoBusca.normalizar("CONCEIÇÃO")).isEqualTo("conceicao");
     }
 
     // ---------- isolamento por tenant ----------
@@ -206,7 +245,7 @@ class ClienteServiceTest {
         when(clienteRepository.findByIdAndTenantId(5L, TENANT)).thenReturn(Optional.of(cliente));
 
         ClienteResponse resposta = service.atualizar(TENANT, 5L, new ClienteRequest(TipoPessoa.JURIDICA, CNPJ,
-                "Nome Novo", null, null, null, RegimeTributario.LUCRO_REAL, "obs", 3L));
+                "Nome Novo", null, null, null, RegimeTributario.LUCRO_REAL, "obs", 3L, null));
 
         assertThat(resposta.nome()).isEqualTo("Nome Novo");
         assertThat(resposta.regimeTributario()).isEqualTo(RegimeTributario.LUCRO_REAL);
@@ -326,7 +365,7 @@ class ClienteServiceTest {
 
     private static ClienteRequest requestPj(Long versao) {
         return new ClienteRequest(TipoPessoa.JURIDICA, CNPJ, "Empresa Exemplo LTDA", null, null, null, null, null,
-                versao);
+                versao, null);
     }
 
     private static Cliente cliente(Long id, Long tenantId, boolean ativo, long versao) {

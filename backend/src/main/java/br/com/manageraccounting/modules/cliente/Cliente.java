@@ -2,6 +2,8 @@ package br.com.manageraccounting.modules.cliente;
 
 import java.time.Instant;
 
+import br.com.manageraccounting.modules.cliente.dto.EnderecoDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -53,6 +55,31 @@ public class Cliente {
     @Column(length = 1000)
     private String observacoes;
 
+    @Column(length = 8)
+    private String cep;
+
+    @Column(length = 150)
+    private String logradouro;
+
+    @Column(length = 20)
+    private String numero;
+
+    @Column(length = 100)
+    private String complemento;
+
+    @Column(length = 100)
+    private String bairro;
+
+    @Column(length = 100)
+    private String cidade;
+
+    @Column(length = 2)
+    private String uf;
+
+    /** Nome, nome fantasia e e-mail em minúsculas e sem acentos (ver {@link TextoBusca}). */
+    @Column(nullable = false, length = 500)
+    private String busca;
+
     @Column(nullable = false)
     private boolean ativo;
 
@@ -99,6 +126,14 @@ public class Cliente {
         this.telefone = dados.telefone();
         this.regimeTributario = dados.regimeTributario();
         this.observacoes = dados.observacoes();
+        this.cep = dados.endereco().cep();
+        this.logradouro = dados.endereco().logradouro();
+        this.numero = dados.endereco().numero();
+        this.complemento = dados.endereco().complemento();
+        this.bairro = dados.endereco().bairro();
+        this.cidade = dados.endereco().cidade();
+        this.uf = dados.endereco().uf();
+        this.busca = TextoBusca.doCliente(dados.nome(), dados.nomeFantasia(), dados.email());
         this.dataAtualizacao = agora;
     }
 
@@ -140,6 +175,22 @@ public class Cliente {
 
     public String getObservacoes() {
         return observacoes;
+    }
+
+    public EnderecoDto getEndereco() {
+        return new EnderecoDto(cep, logradouro, numero, complemento, bairro, cidade, uf);
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public String getUf() {
+        return uf;
+    }
+
+    public String getBusca() {
+        return busca;
     }
 
     public boolean isAtivo() {

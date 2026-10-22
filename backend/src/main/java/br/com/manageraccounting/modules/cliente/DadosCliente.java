@@ -1,8 +1,10 @@
 package br.com.manageraccounting.modules.cliente;
 
+import br.com.manageraccounting.modules.cliente.dto.EnderecoDto;
+
 /**
- * Dados do cliente já validados e normalizados pelo {@link ClienteService} (documento e telefone sem pontuação,
- * textos sem espaços nas pontas e vazios como nulos).
+ * Dados do cliente já validados e normalizados pelo {@link ClienteService} (documento, telefone e CEP sem
+ * pontuação, textos sem espaços nas pontas e vazios como nulos). {@code endereco} nunca é nulo (campos podem ser).
  */
 record DadosCliente(
         TipoPessoa tipoPessoa,
@@ -12,5 +14,6 @@ record DadosCliente(
         String email,
         String telefone,
         RegimeTributario regimeTributario,
-        String observacoes) {
+        String observacoes,
+        EnderecoDto endereco) {
 }

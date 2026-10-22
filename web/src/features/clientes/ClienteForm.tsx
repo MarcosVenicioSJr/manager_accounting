@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useBlocker } from 'react-router-dom'
-import { AlertIcon } from '../../components/icons'
+import { AlertIcon, SpinnerIcon } from '../../components/icons'
 import { ConfirmDialog } from '../../components/ui/Dialog'
 import { getErrorCode, getErrorMessage } from '../../services/errors'
+import { buscarCep, mascararCep, UFS } from './cep'
 import { documentoValido, limparDocumento, mascararDocumento } from './documento'
 import { mascararTelefone } from './formatar'
 import type { ClienteFormValores } from './clienteFormValores'
@@ -27,6 +28,15 @@ function paraDados(v: ClienteFormValores): ClienteDados {
     email: texto(v.email),
     telefone: v.telefone.replace(/\D/g, '') || null,
     observacoes: texto(v.observacoes),
+    endereco: {
+      cep: v.cep.replace(/\D/g, '') || null,
+      logradouro: texto(v.logradouro),
+      numero: texto(v.numero),
+      complemento: texto(v.complemento),
+      bairro: texto(v.bairro),
+      cidade: texto(v.cidade),
+      uf: v.uf || null,
+    },
   }
 }
 
@@ -44,6 +54,9 @@ function validar(v: ClienteFormValores): Erros {
 
   const telefone = v.telefone.replace(/\D/g, '')
   if (telefone && (telefone.length < 10 || telefone.length > 11)) erros.telefone = 'Informe o DDD e o número.'
+
+  const cep = v.cep.replace(/\D/g, '')
+  if (cep && cep.length !== 8) erros.cep = 'CEP incompleto. Informe os 8 números.'
 
   if (v.observacoes.length > MAX_OBSERVACOES) erros.observacoes = `Máximo de ${MAX_OBSERVACOES} caracteres.`
   return erros
@@ -118,11 +131,62 @@ export function ClienteForm({
       id: `cliente-${campo}`,
       'aria-invalid': Boolean(erro),
       'aria-describedby':
-        erro || campo === 'observacoes' || (campo === 'documento' && juridica)
+        erro || campo === 'observacoes' || (campo === 'documento' && juridica) || (campo === 'cep' && dicaCep)
           ? `cliente-${campo}-desc`
           : undefined,
     }
   }
+
+  // ---------- CEP: ao completar os 8 números, busca o endereço e preenche os campos vazios ou vindos do CEP ----------
+  const [estadoCep, setEstadoCep] = useState<'parado' | 'buscando' | 'encontrado' | 'nao-encontrado' | 'falha'>('parado')
+  const buscaCepRef = useRef<AbortController | null>(null)
+  const numeroRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => () => buscaCepRef.current?.abort(), [])
+
+  async function alterarCep(digitado: string) {
+    const cep = mascararCep(digitado)
+    alterar('cep', cep)
+    buscaCepRef.current?.abort()
+    const digitos = cep.replace(/\D/g, '')
+    if (digitos.length !== 8) {
+      setEstadoCep('parado')
+      return
+    }
+    const controle = new AbortController()
+    buscaCepRef.current = controle
+    setEstadoCep('buscando')
+    try {
+      const resultado = await buscarCep(digitos, controle.signal)
+      if (resultado.tipo !== 'ok') {
+        setEstadoCep(resultado.tipo)
+        return
+      }
+      const { endereco } = resultado
+      setValores((atual) => ({
+        ...atual,
+        logradouro: endereco.logradouro || atual.logradouro,
+        bairro: endereco.bairro || atual.bairro,
+        cidade: endereco.cidade || atual.cidade,
+        uf: (UFS as readonly string[]).includes(endereco.uf) ? endereco.uf : atual.uf,
+      }))
+      setEstadoCep('encontrado')
+      numeroRef.current?.focus()
+    } catch {
+      // Busca cancelada (outro CEP digitado)
+    }
+  }
+
+  const dicaCep =
+    estadoCep === 'buscando'
+      ? 'Buscando endereço…'
+      : estadoCep === 'nao-encontrado'
+        ? 'CEP não encontrado. Preencha o endereço manualmente.'
+        : estadoCep === 'falha'
+          ? 'Não foi possível buscar o CEP agora. Preencha manualmente.'
+          : estadoCep === 'encontrado'
+            ? 'Endereço preenchido pelo CEP. Confira e informe o número.'
+            : 'Digite o CEP para preencher o endereço.'
 
   function alterar<C extends Campo>(campo: C, valor: ClienteFormValores[C]) {
     setValores((atual) => ({ ...atual, [campo]: valor }))
@@ -319,6 +383,97 @@ export function ClienteForm({
               autoComplete="off"
               placeholder="(85) 99999-9999"
             />
+          </Campo>
+        </div>
+      </section>
+
+      <section className="panel cf-section" aria-labelledby="cf-endereco">
+        <h2 id="cf-endereco" className="cf-section__title">
+          Endereço
+        </h2>
+        <div className="cf-grid cf-grid--endereco">
+          <Campo id="cep" rotulo="CEP" erro={erroDe('cep')} dica={dicaCep}>
+            <div className="cf-cep">
+              <input
+                {...ariaDe('cep')}
+                className="cf-input cf-input--mono"
+                value={valores.cep}
+                onChange={(e) => alterarCep(e.target.value)}
+                onBlur={() => tocar('cep')}
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="00000-000"
+              />
+              {estadoCep === 'buscando' && <SpinnerIcon className="cf-cep__spinner" width={18} height={18} />}
+            </div>
+          </Campo>
+          <Campo id="logradouro" rotulo="Logradouro" largo>
+            <input
+              {...ariaDe('logradouro')}
+              className="cf-input"
+              value={valores.logradouro}
+              onChange={(e) => alterar('logradouro', e.target.value)}
+              maxLength={150}
+              autoComplete="off"
+              placeholder="Rua, avenida…"
+            />
+          </Campo>
+          <Campo id="numero" rotulo="Número">
+            <input
+              {...ariaDe('numero')}
+              ref={numeroRef}
+              className="cf-input"
+              value={valores.numero}
+              onChange={(e) => alterar('numero', e.target.value)}
+              maxLength={20}
+              autoComplete="off"
+            />
+          </Campo>
+          <Campo id="complemento" rotulo="Complemento">
+            <input
+              {...ariaDe('complemento')}
+              className="cf-input"
+              value={valores.complemento}
+              onChange={(e) => alterar('complemento', e.target.value)}
+              maxLength={100}
+              autoComplete="off"
+              placeholder="Sala, bloco…"
+            />
+          </Campo>
+          <Campo id="bairro" rotulo="Bairro">
+            <input
+              {...ariaDe('bairro')}
+              className="cf-input"
+              value={valores.bairro}
+              onChange={(e) => alterar('bairro', e.target.value)}
+              maxLength={100}
+              autoComplete="off"
+            />
+          </Campo>
+          <Campo id="cidade" rotulo="Cidade">
+            <input
+              {...ariaDe('cidade')}
+              className="cf-input"
+              value={valores.cidade}
+              onChange={(e) => alterar('cidade', e.target.value)}
+              maxLength={100}
+              autoComplete="off"
+            />
+          </Campo>
+          <Campo id="uf" rotulo="UF">
+            <select
+              {...ariaDe('uf')}
+              className="cf-input"
+              value={valores.uf}
+              onChange={(e) => alterar('uf', e.target.value)}
+            >
+              <option value="">—</option>
+              {UFS.map((uf) => (
+                <option key={uf} value={uf}>
+                  {uf}
+                </option>
+              ))}
+            </select>
           </Campo>
         </div>
       </section>

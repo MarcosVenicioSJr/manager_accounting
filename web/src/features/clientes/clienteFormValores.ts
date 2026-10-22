@@ -1,3 +1,4 @@
+import { mascararCep } from './cep'
 import { mascararDocumento } from './documento'
 import { mascararTelefone } from './formatar'
 import type { Cliente, RegimeTributario, TipoPessoa } from './types'
@@ -12,6 +13,13 @@ export type ClienteFormValores = {
   email: string
   telefone: string
   observacoes: string
+  cep: string
+  logradouro: string
+  numero: string
+  complemento: string
+  bairro: string
+  cidade: string
+  uf: string
 }
 
 export const VALORES_NOVO: ClienteFormValores = {
@@ -23,6 +31,13 @@ export const VALORES_NOVO: ClienteFormValores = {
   email: '',
   telefone: '',
   observacoes: '',
+  cep: '',
+  logradouro: '',
+  numero: '',
+  complemento: '',
+  bairro: '',
+  cidade: '',
+  uf: '',
 }
 
 export function valoresDoCliente(c: Cliente): ClienteFormValores {
@@ -35,5 +50,12 @@ export function valoresDoCliente(c: Cliente): ClienteFormValores {
     email: c.email ?? '',
     telefone: c.telefone ? mascararTelefone(c.telefone) : '',
     observacoes: c.observacoes ?? '',
+    cep: c.endereco.cep ? mascararCep(c.endereco.cep) : '',
+    logradouro: c.endereco.logradouro ?? '',
+    numero: c.endereco.numero ?? '',
+    complemento: c.endereco.complemento ?? '',
+    bairro: c.endereco.bairro ?? '',
+    cidade: c.endereco.cidade ?? '',
+    uf: c.endereco.uf ?? '',
   }
 }

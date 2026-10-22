@@ -2,6 +2,7 @@ package br.com.manageraccounting.modules.cliente.dto;
 
 import br.com.manageraccounting.modules.cliente.RegimeTributario;
 import br.com.manageraccounting.modules.cliente.TipoPessoa;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -39,5 +40,8 @@ public record ClienteRequest(
         @Size(max = 1000, message = "Observações muito longas (máximo de 1000 caracteres)")
         String observacoes,
 
-        Long versao) {
+        Long versao,
+
+        @Valid
+        EnderecoDto endereco) {
 }

@@ -258,6 +258,7 @@ export function ClientesPage() {
                     <span className="cl-sub">
                       {c.tipoPessoa === 'JURIDICA' ? 'Pessoa jurídica' : 'Pessoa física'}
                       {c.nomeFantasia ? ` · ${c.nomeFantasia}` : ''}
+                      {c.cidade ? ` · ${c.cidade}${c.uf ? `/${c.uf}` : ''}` : ''}
                     </span>
                   </td>
                   <td data-label="CPF/CNPJ">

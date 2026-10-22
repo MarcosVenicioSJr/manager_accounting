@@ -24,7 +24,7 @@ Backoffice multi-tenant (white-label) para contadores organizarem seus clientes.
 | Senha | BCrypt; a senha temporária é guardada em `senha_hash` e substituída no primeiro acesso (sem coluna de senha temporária) |
 | Proteção do login | 5 senhas erradas bloqueiam o usuário por 15 minutos; mensagem de erro sempre genérica |
 | Tema no backoffice | Cores do tenant passam por um ajuste de contraste (WCAG AA) antes de virar variáveis CSS; menu lateral na primária escurecida |
-| Clientes | Isolados por `tenant_id`; CPF/CNPJ único por tenant (aceita CNPJ alfanumérico); edição com controle de versão; desativação em vez de exclusão |
+| Clientes | Isolados por `tenant_id`; CPF/CNPJ único por tenant (aceita CNPJ alfanumérico); edição com controle de versão; desativação em vez de exclusão; endereço opcional (CEP buscado no ViaCEP pelo navegador); busca sem diferenciar acentos (coluna `busca`) |
 | Token do app do cliente | 16 caracteres Base32 Crockford (`XXXX-XXXX-XXXX-XXXX`), só o hash SHA-256 no banco, um ativo por cliente, mostrado uma única vez |
 
 ## Endpoints de autenticação
