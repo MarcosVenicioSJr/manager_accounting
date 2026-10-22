@@ -1,0 +1,150 @@
+/* Meu perfil: seções empilhadas, mesma linguagem do formulário de clientes (cf-*). */
+
+.pf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 760px;
+}
+
+.pf-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-5);
+}
+
+.pf-head > div {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.pf-head__title {
+  margin-bottom: var(--space-2);
+}
+
+.pf-current {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pf-help {
+  margin: 4px 0 0;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.pf-readonly {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.pf-form {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+
+.pf-form .pf-help {
+  margin-top: var(--space-3);
+}
+
+.pf-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.pf-alert {
+  margin-bottom: var(--space-4);
+}
+
+.pf-pending {
+  margin-top: var(--space-4);
+}
+
+.pf-pending svg:first-child {
+  color: var(--color-primary-strong);
+}
+
+.pf-pending__title {
+  display: block;
+  font-weight: 600;
+}
+
+.pf-pending__text {
+  margin: 4px 0 0;
+}
+
+.pf-pending__muted {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.pf-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.pf-rules li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pf-rules li:not(.pf-rules__ok)::before {
+  content: '○';
+  font-size: 11px;
+}
+
+.pf-rules__ok {
+  color: var(--success);
+  font-weight: 500;
+}
+
+.pf-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  color: var(--ink-2);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pf-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary-strong);
+}
+
+@media (max-width: 599px) {
+  .pf-head .ui-btn,
+  .pf-actions .ui-btn {
+    width: 100%;
+  }
+
+  .pf-actions {
+    flex-direction: column-reverse;
+  }
+}

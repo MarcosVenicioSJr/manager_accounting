@@ -143,6 +143,13 @@ export const ArrowLeftIcon = (p: IconProps) => (
   </Icon>
 )
 
+export const MailIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+    <path d="m4.5 7 7.5 6 7.5-6" />
+  </Icon>
+)
+
 export const SpinnerIcon = (p: IconProps) => (
   <Icon {...p} className={`ui-spin ${p.className ?? ''}`}>
     <path d="M12 3.5a8.5 8.5 0 1 1-8.5 8.5" />

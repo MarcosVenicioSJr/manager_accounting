@@ -2,11 +2,13 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PrimeiroAcessoRoute, ProtectedRoute } from '../features/auth/ProtectedRoute'
 import { BackofficeLayout } from '../layouts/BackofficeLayout'
 import { ClienteDetalhePage } from '../pages/clientes/ClienteDetalhePage'
+import { ConfirmarAlteracaoPage } from '../pages/confirmar-alteracao/ConfirmarAlteracaoPage'
 import { ClientesPage } from '../pages/clientes/ClientesPage'
 import { NovoClientePage } from '../pages/clientes/NovoClientePage'
 import { InicioPage } from '../pages/inicio/InicioPage'
 import { LoginPage } from '../pages/login/LoginPage'
 import { NaoEncontradoPage } from '../pages/nao-encontrado/NaoEncontradoPage'
+import { PerfilPage } from '../pages/perfil/PerfilPage'
 import { PrimeiroAcessoPage } from '../pages/primeiro-acesso/PrimeiroAcessoPage'
 import { RecuperarSenhaPage } from '../pages/recuperar-senha/RecuperarSenhaPage'
 import { RedefinirSenhaPage } from '../pages/redefinir-senha/RedefinirSenhaPage'
@@ -17,6 +19,8 @@ export const router = createBrowserRouter([
   { path: '/recuperar-senha', element: <RecuperarSenhaPage /> },
   // Aberta pelo link do e-mail (/redefinir-senha#token=...)
   { path: '/redefinir-senha', element: <RedefinirSenhaPage /> },
+  // Aberta pelo link do e-mail do Meu perfil (/confirmar-alteracao#token=...); funciona logado ou não
+  { path: '/confirmar-alteracao', element: <ConfirmarAlteracaoPage /> },
   {
     path: '/primeiro-acesso',
     element: (
@@ -38,6 +42,7 @@ export const router = createBrowserRouter([
       { path: 'clientes', element: <ClientesPage /> },
       { path: 'clientes/novo', element: <NovoClientePage /> },
       { path: 'clientes/:id', element: <ClienteDetalhePage /> },
+      { path: 'perfil', element: <PerfilPage /> },
       { path: '*', element: <NaoEncontradoPage /> },
     ],
   },

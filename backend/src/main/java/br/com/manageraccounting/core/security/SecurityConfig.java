@@ -18,6 +18,7 @@ import br.com.manageraccounting.modules.usuario.UsuarioRepository;
  * <ul>
  *   <li>login, refresh e logout são públicos (o refresh token vai em cookie HttpOnly);</li>
  *   <li>a recuperação de senha ("Esqueceu sua senha?") é pública;</li>
+ *   <li>a confirmação de troca de senha/e-mail pelo link do e-mail é pública (o token é a prova);</li>
  *   <li>primeiro-acesso exige estar logado com a senha temporária ({@code ROLE_PRIMEIRO_ACESSO});</li>
  *   <li>todo o resto exige um contador com o primeiro acesso concluído ({@code ROLE_CONTADOR}).</li>
  * </ul>
@@ -45,7 +46,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,
                                 "/api/auth/login", "/api/auth/refresh", "/api/auth/logout",
                                 "/api/auth/recuperar-senha", "/api/auth/redefinir-senha",
-                                "/api/auth/redefinir-senha/validar").permitAll()
+                                "/api/auth/redefinir-senha/validar",
+                                "/api/auth/confirmar-alteracao", "/api/auth/confirmar-alteracao/validar").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/primeiro-acesso").hasRole("PRIMEIRO_ACESSO")
                         .anyRequest().hasRole("CONTADOR"))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, usuarioRepository),

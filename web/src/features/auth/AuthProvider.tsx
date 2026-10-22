@@ -81,9 +81,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('anonymous')
   }, [setTheme])
 
+  const recarregarUsuario = useCallback(async () => {
+    try {
+      setUsuario(await buscarUsuarioLogado())
+    } catch {
+      // Mantém o que já estava na tela
+    }
+  }, [])
+
   const value = useMemo<AuthContextValue>(
-    () => ({ status, usuario, login, concluirPrimeiroAcesso, logout }),
-    [status, usuario, login, concluirPrimeiroAcesso, logout],
+    () => ({ status, usuario, login, concluirPrimeiroAcesso, logout, recarregarUsuario }),
+    [status, usuario, login, concluirPrimeiroAcesso, logout, recarregarUsuario],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

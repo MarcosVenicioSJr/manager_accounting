@@ -96,6 +96,17 @@ public class Usuario {
         this.bloqueadoAte = null;
     }
 
+    /** Meu perfil: nome e telefone mudam na hora (e-mail e senha só depois da confirmação por e-mail). */
+    public void atualizarDados(String nomeCompleto, String telefone) {
+        this.nomeCompleto = nomeCompleto;
+        this.telefone = telefone;
+    }
+
+    /** Meu perfil: novo e-mail, depois de confirmado pelo link enviado a ele. */
+    public void alterarEmail(String novoEmail) {
+        this.email = novoEmail;
+    }
+
     /** Só quem já concluiu o primeiro acesso tem e-mail cadastrado para receber o link. */
     public boolean podeRecuperarSenhaPorEmail() {
         return ativo && primeiroAcessoConcluido && email != null && !email.isBlank();

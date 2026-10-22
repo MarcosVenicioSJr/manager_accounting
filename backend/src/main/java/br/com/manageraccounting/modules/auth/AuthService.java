@@ -26,8 +26,8 @@ import br.com.manageraccounting.modules.usuario.UsuarioRepository;
 @Service
 public class AuthService {
 
-    static final int MAX_TENTATIVAS = 5;
-    static final Duration DURACAO_BLOQUEIO = Duration.ofMinutes(15);
+    public static final int MAX_TENTATIVAS = 5;
+    public static final Duration DURACAO_BLOQUEIO = Duration.ofMinutes(15);
 
     /** Mesma mensagem para login inexistente, senha errada, conta inativa ou bloqueada (não revela qual foi). */
     static final String MENSAGEM_LOGIN_INVALIDO = "Login ou senha inválidos, ou acesso temporariamente indisponível.";

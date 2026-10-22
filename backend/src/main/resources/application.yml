@@ -71,3 +71,10 @@ app:
       # Por usuário: tempo mínimo entre dois e-mails e máximo de e-mails por hora
       intervalo-minimo: ${RECUPERACAO_SENHA_INTERVALO_MINIMO:2m}
       max-envios-por-hora: ${RECUPERACAO_SENHA_MAX_ENVIOS_POR_HORA:5}
+  perfil:
+    confirmacao:
+      # Meu perfil: validade do link que confirma a troca de senha ou de e-mail
+      token-ttl: ${PERFIL_CONFIRMACAO_TOKEN_TTL:30m}
+      # Por usuário e por tipo: tempo mínimo entre dois pedidos e máximo de pedidos por hora
+      intervalo-minimo: ${PERFIL_CONFIRMACAO_INTERVALO_MINIMO:1m}
+      max-envios-por-hora: ${PERFIL_CONFIRMACAO_MAX_ENVIOS_POR_HORA:5}
