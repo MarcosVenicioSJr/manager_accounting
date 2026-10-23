@@ -98,7 +98,7 @@ Passaram a exigir **administrador**: `POST /api/clientes/{id}/desativar`, `POST 
 | `core/security/SecurityConfig` | Rotas de administrador e rotas públicas do convite |
 | `modules/auth/RefreshTokenService` | `apagarTodos` (antes de apagar um pendente) |
 
-Testes novos: `EquipeServiceTest` (15 casos).
+Testes novos: `EquipeServiceTest` (14 casos).
 
 ## Front
 

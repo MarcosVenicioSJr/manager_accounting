@@ -737,3 +737,66 @@ select.cf-input {
     transition: none;
   }
 }
+
+/* ---------- Endereço ---------- */
+
+.cf-grid--endereco {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.cf-grid--endereco .cf-field {
+  grid-column: span 2;
+}
+
+.cf-grid--endereco .cf-field--wide {
+  grid-column: span 4;
+}
+
+.cf-grid--endereco .cf-field:has(#cliente-complemento) {
+  grid-column: span 4;
+}
+
+.cf-grid--endereco .cf-field:has(#cliente-cidade) {
+  grid-column: span 3;
+}
+
+.cf-grid--endereco .cf-field:has(#cliente-uf) {
+  grid-column: span 1;
+}
+
+.cf-cep {
+  position: relative;
+}
+
+.cf-cep__spinner {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  margin-top: -9px;
+  color: var(--color-primary-strong);
+}
+
+@media (max-width: 599px) {
+  .cf-grid--endereco {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cf-grid--endereco .cf-field,
+  .cf-grid--endereco .cf-field--wide,
+  .cf-grid--endereco .cf-field:has(#cliente-complemento) {
+    grid-column: 1 / -1;
+  }
+
+  .cf-grid--endereco .cf-field:has(#cliente-numero),
+  .cf-grid--endereco .cf-field:has(#cliente-cep) {
+    grid-column: span 2;
+  }
+
+  .cf-grid--endereco .cf-field:has(#cliente-cidade) {
+    grid-column: span 3;
+  }
+
+  .cf-grid--endereco .cf-field:has(#cliente-uf) {
+    grid-column: span 1;
+  }
+}

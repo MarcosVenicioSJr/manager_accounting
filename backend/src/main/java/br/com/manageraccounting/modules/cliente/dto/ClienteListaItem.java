@@ -11,6 +11,8 @@ public record ClienteListaItem(
         String nomeFantasia,
         String email,
         String telefone,
+        String cidade,
+        String uf,
         boolean ativo,
         boolean acessoAppAtivo) {
 }

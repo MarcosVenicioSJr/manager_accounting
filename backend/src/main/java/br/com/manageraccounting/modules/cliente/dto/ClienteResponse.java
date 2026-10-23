@@ -15,6 +15,7 @@ public record ClienteResponse(
         String telefone,
         RegimeTributario regimeTributario,
         String observacoes,
+        EnderecoDto endereco,
         boolean ativo,
         Instant dataInclusao,
         Instant dataAtualizacao,

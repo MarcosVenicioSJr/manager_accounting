@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import br.com.manageraccounting.modules.cliente.dto.ClienteListaItem;
 import br.com.manageraccounting.modules.cliente.dto.ClienteRequest;
 import br.com.manageraccounting.modules.cliente.dto.ClienteResponse;
 import br.com.manageraccounting.modules.cliente.dto.ClientesResumoResponse;
+import br.com.manageraccounting.modules.cliente.dto.EnderecoDto;
 import br.com.manageraccounting.modules.cliente.dto.PaginaResponse;
 import br.com.manageraccounting.modules.cliente.dto.TokenGeradoResponse;
 import jakarta.persistence.criteria.Predicate;
@@ -80,7 +82,8 @@ public class ClienteService {
 
         List<ClienteListaItem> itens = page.getContent().stream()
                 .map(c -> new ClienteListaItem(c.getId(), c.getTipoPessoa(), c.getDocumento(), c.getNome(),
-                        c.getNomeFantasia(), c.getEmail(), c.getTelefone(), c.isAtivo(), comToken.contains(c.getId())))
+                        c.getNomeFantasia(), c.getEmail(), c.getTelefone(), c.getCidade(), c.getUf(), c.isAtivo(),
+                        comToken.contains(c.getId())))
                 .toList();
 
         return new PaginaResponse<>(itens, page.getNumber(), page.getSize(), page.getTotalElements(),
@@ -216,7 +219,7 @@ public class ClienteService {
                         .map(t -> new AcessoAppResponse(true, t.getCriadoEm(), t.getUltimoUsoEm()))
                         .orElseGet(AcessoAppResponse::semAcesso);
         return new ClienteResponse(c.getId(), c.getTipoPessoa(), c.getDocumento(), c.getNome(), c.getNomeFantasia(),
-                c.getEmail(), c.getTelefone(), c.getRegimeTributario(), c.getObservacoes(), c.isAtivo(),
+                c.getEmail(), c.getTelefone(), c.getRegimeTributario(), c.getObservacoes(), c.getEndereco(), c.isAtivo(),
                 c.getDataInclusao(), c.getDataAtualizacao(), c.getVersao(), acesso);
     }
 
@@ -251,7 +254,34 @@ public class ClienteService {
                 juridica ? texto(request.nomeFantasia()) : null,
                 email, telefone,
                 juridica ? request.regimeTributario() : null,
-                texto(request.observacoes()));
+                texto(request.observacoes()),
+                normalizarEndereco(request.endereco()));
+    }
+
+    static final Set<String> UFS = Set.of("AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
+            "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO");
+
+    /** Endereço opcional: CEP só com dígitos (8), UF em maiúsculas e da lista, textos vazios como nulos. */
+    static EnderecoDto normalizarEndereco(EnderecoDto endereco) {
+        if (endereco == null) {
+            return new EnderecoDto(null, null, null, null, null, null, null);
+        }
+        String cep = texto(endereco.cep());
+        if (cep != null) {
+            cep = cep.replaceAll("\\D", "");
+            if (cep.length() != 8) {
+                throw new BusinessException("CEP inválido. Informe os 8 números.");
+            }
+        }
+        String uf = texto(endereco.uf());
+        if (uf != null) {
+            uf = uf.toUpperCase(Locale.ROOT);
+            if (!UFS.contains(uf)) {
+                throw new BusinessException("UF inválida.");
+            }
+        }
+        return new EnderecoDto(cep, texto(endereco.logradouro()), texto(endereco.numero()),
+                texto(endereco.complemento()), texto(endereco.bairro()), texto(endereco.cidade()), uf);
     }
 
     private static String texto(String valor) {
@@ -262,7 +292,7 @@ public class ClienteService {
         return limpo.isEmpty() ? null : limpo;
     }
 
-    /** Tenant obrigatório + status + busca por nome, nome fantasia, e-mail ou documento. */
+    /** Tenant obrigatório + status + busca por nome, nome fantasia, e-mail (sem diferenciar acentos) ou documento. */
     static Specification<Cliente> filtro(Long tenantId, String busca, StatusFiltro status) {
         return (root, query, cb) -> {
             List<Predicate> predicados = new ArrayList<>();
@@ -276,11 +306,10 @@ public class ClienteService {
 
             String termo = texto(busca);
             if (termo != null) {
-                String padrao = "%" + escaparLike(termo.toLowerCase(Locale.ROOT)) + "%";
+                // Nome, nome fantasia e e-mail ficam na coluna "busca", já sem acentos e em minúsculas
+                String padrao = "%" + escaparLike(TextoBusca.normalizar(termo)) + "%";
                 List<Predicate> ou = new ArrayList<>();
-                ou.add(cb.like(cb.lower(root.get("nome")), padrao, '\\'));
-                ou.add(cb.like(cb.lower(root.get("nomeFantasia")), padrao, '\\'));
-                ou.add(cb.like(cb.lower(root.get("email")), padrao, '\\'));
+                ou.add(cb.like(root.get("busca"), padrao, '\\'));
 
                 String documento = termo.replaceAll("[\\s./-]", "").toUpperCase(Locale.ROOT);
                 if (!documento.isEmpty() && documento.chars().anyMatch(Character::isDigit)) {
