@@ -77,6 +77,12 @@ public class RefreshTokenService {
         repository.revogarTodosDoUsuario(usuarioId, clock.instant());
     }
 
+    /** Apaga as sessões do usuário (antes de apagar o próprio usuário). */
+    @Transactional
+    public void apagarTodos(Long usuarioId) {
+        repository.apagarDoUsuario(usuarioId);
+    }
+
     /** Limpeza diária das sessões expiradas há mais de um dia. */
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional

@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PrimeiroAcessoRoute, ProtectedRoute } from '../features/auth/ProtectedRoute'
 import { BackofficeLayout } from '../layouts/BackofficeLayout'
+import { AceitarConvitePage } from '../pages/aceitar-convite/AceitarConvitePage'
 import { ClienteDetalhePage } from '../pages/clientes/ClienteDetalhePage'
 import { ConfirmarAlteracaoPage } from '../pages/confirmar-alteracao/ConfirmarAlteracaoPage'
 import { ClientesPage } from '../pages/clientes/ClientesPage'
@@ -12,6 +13,7 @@ import { PerfilPage } from '../pages/perfil/PerfilPage'
 import { PrimeiroAcessoPage } from '../pages/primeiro-acesso/PrimeiroAcessoPage'
 import { RecuperarSenhaPage } from '../pages/recuperar-senha/RecuperarSenhaPage'
 import { RedefinirSenhaPage } from '../pages/redefinir-senha/RedefinirSenhaPage'
+import { UsuariosPage } from '../pages/usuarios/UsuariosPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
@@ -21,6 +23,8 @@ export const router = createBrowserRouter([
   { path: '/redefinir-senha', element: <RedefinirSenhaPage /> },
   // Aberta pelo link do e-mail do Meu perfil (/confirmar-alteracao#token=...); funciona logado ou não
   { path: '/confirmar-alteracao', element: <ConfirmarAlteracaoPage /> },
+  // Aberta pelo link do convite de usuário (/aceitar-convite#token=...)
+  { path: '/aceitar-convite', element: <AceitarConvitePage /> },
   {
     path: '/primeiro-acesso',
     element: (
@@ -43,6 +47,7 @@ export const router = createBrowserRouter([
       { path: 'clientes/novo', element: <NovoClientePage /> },
       { path: 'clientes/:id', element: <ClienteDetalhePage /> },
       { path: 'perfil', element: <PerfilPage /> },
+      { path: 'usuarios', element: <UsuariosPage /> },
       { path: '*', element: <NaoEncontradoPage /> },
     ],
   },

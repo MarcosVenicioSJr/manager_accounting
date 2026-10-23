@@ -21,8 +21,9 @@ novo_tema AS (
     INSERT INTO tenant_tema (tenant_id, cor_primaria, cor_secundaria)
     SELECT id, '#0f766e', '#115e59' FROM novo_tenant
 )
-INSERT INTO usuario (tenant_id, login, senha_hash)
-SELECT id, 'contador.exemplo', crypt('Temp@1234', gen_salt('bf', 10))
+-- perfil ADMIN: o primeiro usuário de cada escritório é o administrador (convida os demais pelo backoffice)
+INSERT INTO usuario (tenant_id, login, senha_hash, perfil)
+SELECT id, 'contador.exemplo', crypt('Temp@1234', gen_salt('bf', 10)), 'ADMIN'
 FROM novo_tenant;
 
 -- Login: contador.exemplo   |   Senha temporária: Temp@1234

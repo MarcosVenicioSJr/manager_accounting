@@ -11,8 +11,9 @@ Backoffice multi-tenant (white-label) para contadores organizarem seus clientes.
 | Login | Tela genérica, sem marca de escritório; login único na plataforma inteira |
 | Tema | Logo e cores do tenant carregados após o login |
 | Tenant | `Id`, `NomeEmpresa`, `Guid` (código da empresa, único e imutável), `Ativo`, `DataInclusao` |
-| Usuário | Entidade separada do tenant (1 tenant para N usuários); por enquanto só o contador acessa |
-| Cadastro | Tenants e usuários cadastrados direto no banco, com senha temporária |
+| Usuário | Entidade separada do tenant (1 tenant para N usuários); perfis ADMIN (gerencia usuários, desativa clientes, revoga acesso ao app) e USUARIO (cadastra/edita clientes e gera token) |
+| Cadastro | Tenants e o primeiro usuário (ADMIN) de cada um cadastrados direto no banco, com senha temporária; os demais usuários são convidados pelo administrador (link por e-mail para criar a senha) |
+| Tema e logo | Não são alterados pelo backoffice: cores em `tenant_tema` (banco) e logo em `web/public/tenants/<guid>/` |
 | Primeiro acesso | Troca de senha obrigatória e preenchimento de dados adicionais (telefone, e-mail etc.) |
 | Troca de senha/e-mail logado | Exige a senha atual e só vale depois da confirmação pelo link do e-mail (senha: e-mail atual; e-mail: novo endereço) |
 | Recuperação de senha | Usuário digita o login, recebe por e-mail um token de confirmação e, com o token válido, define a nova senha |
@@ -51,6 +52,9 @@ Backoffice multi-tenant (white-label) para contadores organizarem seus clientes.
 | `GET`/`PUT /api/perfil` | Meu perfil (nome e telefone na hora) |
 | `POST /api/perfil/senha` · `/email` | Pede a troca; só vale depois do link do e-mail |
 | `POST /api/auth/confirmar-alteracao` (público) | Confirma a troca pelo token do link |
+
+| `GET/POST /api/usuarios`, `/api/usuarios/{id}/...` (ADMIN) | Usuários do escritório: convite, perfil, desativar/reativar |
+| `POST /api/auth/convite/aceitar` (público) | Convidado cria a senha pelo link |
 
 Cliente de outro tenant responde 404, igual a um id inexistente. Detalhes em `docs/cerebro/005 - Clientes.md`.
 

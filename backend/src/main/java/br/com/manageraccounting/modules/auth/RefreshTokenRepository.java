@@ -23,4 +23,9 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Modifying
     @Query("delete from RefreshToken t where t.expiraEm < :limite")
     int apagarExpiradosAte(@Param("limite") Instant limite);
+
+    /** Apaga as sessões do usuário (usado ao cancelar o convite de quem nunca concluiu o primeiro acesso). */
+    @Modifying(flushAutomatically = true)
+    @Query("delete from RefreshToken t where t.usuarioId = :usuarioId")
+    int apagarDoUsuario(@Param("usuarioId") Long usuarioId);
 }

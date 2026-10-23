@@ -34,6 +34,7 @@ import br.com.manageraccounting.modules.perfil.dto.PerfilResponse;
 import br.com.manageraccounting.modules.perfil.dto.PerfilResponse.TrocaPendente;
 import br.com.manageraccounting.modules.tenant.Tenant;
 import br.com.manageraccounting.modules.tenant.TenantRepository;
+import br.com.manageraccounting.modules.usuario.Telefones;
 import br.com.manageraccounting.modules.usuario.Usuario;
 import br.com.manageraccounting.modules.usuario.UsuarioRepository;
 
@@ -107,7 +108,7 @@ public class PerfilService {
         if (nome.isEmpty()) {
             throw new BusinessException("Informe o nome completo.");
         }
-        usuario.atualizarDados(nome, normalizarTelefone(request.telefone()));
+        usuario.atualizarDados(nome, Telefones.normalizar(request.telefone()));
         return montar(usuario);
     }
 
@@ -313,15 +314,6 @@ public class PerfilService {
 
     private String nomeEscritorio(Usuario usuario) {
         return tenantRepository.findById(usuario.getTenantId()).map(Tenant::getNomeEmpresa).orElse("");
-    }
-
-    /** Mesma regra do primeiro acesso: só os dígitos (DDD + número, com ou sem código do país). */
-    static String normalizarTelefone(String telefone) {
-        String digitos = telefone == null ? "" : telefone.replaceAll("\\D", "");
-        if (digitos.length() < 10 || digitos.length() > 13) {
-            throw new BusinessException("Telefone inválido. Informe o DDD e o número.");
-        }
-        return digitos;
     }
 
     private static String gerarToken() {

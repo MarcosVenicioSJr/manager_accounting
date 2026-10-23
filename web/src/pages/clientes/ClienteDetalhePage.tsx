@@ -16,6 +16,7 @@ import { formatarDocumento } from '../../features/clientes/documento'
 import { formatarDataHora } from '../../features/clientes/formatar'
 import type { Cliente } from '../../features/clientes/types'
 import '../../features/clientes/clientes.css'
+import { useAuth } from '../../features/auth/useAuth'
 import { PageHeader } from '../../layouts/PageHeader'
 import { getErrorMessage, getErrorStatus } from '../../services/errors'
 import { NaoEncontradoPage } from '../nao-encontrado/NaoEncontradoPage'
@@ -52,6 +53,8 @@ function ClienteDetalhe({ id }: { id: string }) {
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
   const [confirmarStatus, setConfirmarStatus] = useState(false)
   const [mudandoStatus, setMudandoStatus] = useState(false)
+  // Desativar/reativar o cliente é só do administrador (o backend também barra)
+  const ehAdmin = useAuth().usuario?.perfil === 'ADMIN'
   // "Recarregar cliente" (conflito de edição) descarta o que foi digitado, mesmo se a versão for a mesma
   const [recargas, setRecargas] = useState(0)
 
@@ -150,7 +153,7 @@ function ClienteDetalhe({ id }: { id: string }) {
           </>
         }
         acoes={
-          cliente.ativo ? (
+          !ehAdmin ? undefined : cliente.ativo ? (
             <button type="button" className="ui-btn ui-btn--danger-outline" onClick={() => setConfirmarStatus(true)}>
               <BanIcon width={18} height={18} />
               Desativar cliente
@@ -180,6 +183,7 @@ function ClienteDetalhe({ id }: { id: string }) {
                 <AlertIcon />
                 <div className="ui-alert__content">
                   Este cliente está inativo: não aparece na lista de ativos e não tem acesso ao app.
+                  {!ehAdmin && ' Só um administrador do escritório pode reativá-lo.'}
                 </div>
               </div>
             )
