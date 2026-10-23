@@ -84,3 +84,6 @@ app:
       validade: ${EQUIPE_CONVITE_VALIDADE:48h}
       # Tempo mínimo entre dois envios para o mesmo usuário (reenviar convite)
       intervalo-minimo: ${EQUIPE_CONVITE_INTERVALO_MINIMO:1m}
+  dashboard:
+    # Fuso usado para dizer em que mês cada cliente foi cadastrado (o banco guarda as datas em UTC)
+    fuso-horario: ${DASHBOARD_FUSO_HORARIO:America/Sao_Paulo}
