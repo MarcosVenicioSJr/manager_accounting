@@ -14,6 +14,7 @@ Backoffice multi-tenant (white-label) para contadores organizarem seus clientes.
 | Usuário | Entidade separada do tenant (1 tenant para N usuários); por enquanto só o contador acessa |
 | Cadastro | Tenants e usuários cadastrados direto no banco, com senha temporária |
 | Primeiro acesso | Troca de senha obrigatória e preenchimento de dados adicionais (telefone, e-mail etc.) |
+| Troca de senha/e-mail logado | Exige a senha atual e só vale depois da confirmação pelo link do e-mail (senha: e-mail atual; e-mail: novo endereço) |
 | Recuperação de senha | Usuário digita o login, recebe por e-mail um token de confirmação e, com o token válido, define a nova senha |
 | Política de senha | Mínimo de 8 caracteres, com letras, números e símbolos |
 | E-mail | Mailpit no Docker em desenvolvimento; provedor SMTP de produção definido na publicação |
@@ -46,6 +47,10 @@ Backoffice multi-tenant (white-label) para contadores organizarem seus clientes.
 | `POST /api/clientes` · `PUT /api/clientes/{id}` | Cadastro e edição (409 `DOCUMENTO_DUPLICADO` / `EDICAO_SIMULTANEA`) |
 | `POST /api/clientes/{id}/desativar` · `/reativar` | 204 |
 | `POST /api/clientes/{id}/acesso-app` · `DELETE` | Gera (token só nesta resposta) ou revoga o token do app |
+
+| `GET`/`PUT /api/perfil` | Meu perfil (nome e telefone na hora) |
+| `POST /api/perfil/senha` · `/email` | Pede a troca; só vale depois do link do e-mail |
+| `POST /api/auth/confirmar-alteracao` (público) | Confirma a troca pelo token do link |
 
 Cliente de outro tenant responde 404, igual a um id inexistente. Detalhes em `docs/cerebro/005 - Clientes.md`.
 

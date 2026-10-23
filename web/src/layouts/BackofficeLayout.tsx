@@ -147,15 +147,21 @@ export function BackofficeLayout() {
         </nav>
 
         <div className="bo-account">
-          <div className="bo-account__user" title={recolhido ? nomeUsuario : undefined}>
+          <NavLink
+            to="/app/perfil"
+            className="bo-account__user"
+            onClick={() => setMenuAberto(false)}
+            title={recolhido ? `${nomeUsuario} · Meu perfil` : 'Meu perfil'}
+            aria-label={`Meu perfil: ${nomeUsuario}`}
+          >
             <span className="bo-avatar" aria-hidden="true">
               {iniciais(nomeUsuario)}
             </span>
             <div className="bo-account__text">
               <span className="bo-account__name">{nomeUsuario}</span>
-              <span className="bo-account__detail">{usuario?.email || usuario?.login || 'Contador'}</span>
+              <span className="bo-account__detail">Meu perfil</span>
             </div>
-          </div>
+          </NavLink>
           <button
             type="button"
             className="bo-account__logout"

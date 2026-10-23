@@ -13,6 +13,8 @@ export type AuthContextValue = {
   login: (usuario: string, senha: string, manterConectado: boolean) => Promise<void>
   concluirPrimeiroAcesso: (dados: PrimeiroAcessoDados) => Promise<void>
   logout: () => Promise<void>
+  // Busca de novo os dados do contador (ex.: depois de editar o Meu perfil)
+  recarregarUsuario: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
