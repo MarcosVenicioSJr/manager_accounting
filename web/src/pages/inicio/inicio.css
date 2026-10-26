@@ -1,21 +1,49 @@
-/* Página inicial: uma faixa com os números da carteira, separados por réguas finas. */
+/* Página inicial: números da carteira numa faixa com réguas finas e, abaixo, painéis em duas colunas. */
 
-.ini-carteira {
+.ini {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ini-grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.ini-carteira,
+.ini-painel {
   padding: var(--space-5);
 }
 
-.ini-carteira__head {
+.ini-painel {
   display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  height: 100%;
+}
+
+.ini-head {
+  display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-4);
 }
 
-.ini-carteira__head h2 {
+.ini-head h2,
+.ini-equipe h2 {
   margin: 0;
   font-size: 15px;
   font-weight: 600;
   color: var(--ink-2);
+}
+
+.ini-head__info {
+  color: var(--ink-3);
+  font-size: 13px;
 }
 
 .ini-link {
@@ -30,15 +58,28 @@
 }
 
 .ini-link:focus-visible,
-.ini-numero__valor:focus-visible {
+.ini-numero__valor:focus-visible,
+.ini-item:focus-visible {
   outline: 2px solid var(--color-primary-strong);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
+.ini-msg {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.ini-descricao {
+  margin-top: calc(-1 * var(--space-2));
+}
+
+/* ---------- Números da carteira ---------- */
+
 .ini-numeros {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: var(--space-5) 0 0;
 }
 
@@ -84,11 +125,7 @@ a.ini-numero__valor:hover {
   color: var(--ink-2);
 }
 
-.ini-carteira__msg {
-  margin: var(--space-2) 0 0;
-  font-size: 14px;
-  color: var(--ink-2);
-}
+/* ---------- Estado vazio ---------- */
 
 .ini-vazio {
   display: flex;
@@ -109,23 +146,365 @@ a.ini-numero__valor:hover {
 }
 
 .ini-vazio__titulo {
-  margin: 4px 0 0;
+  margin: 4px 0 4px;
   font-weight: 600;
 }
 
-@media (max-width: 599px) {
+/* ---------- Gráfico de novos clientes ---------- */
+
+.ini-grafico {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-3);
+  flex: 1;
+  min-height: 196px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ini-barra {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ini-barra__valor {
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.ini-barra__trilho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.ini-barra__fill {
+  display: block;
+  width: min(100%, 44px);
+  min-height: 2px;
+  border-radius: 6px 6px 0 0;
+  background: color-mix(in srgb, var(--color-primary-strong) 28%, white);
+  transition: height 0.3s ease-out;
+}
+
+.ini-barra--atual .ini-barra__fill {
+  background: var(--color-primary-strong);
+}
+
+.ini-barra--atual .ini-barra__valor {
+  color: var(--ink);
+}
+
+.ini-barra__mes {
+  color: var(--ink-3);
+  font-size: 12px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.ini-barra--atual .ini-barra__mes {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.ini-grafico__skeleton {
+  height: 196px;
+}
+
+/* ---------- Composição da carteira ---------- */
+
+.ini-tipos {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.ini-tipos__barra {
+  display: flex;
+  gap: 3px;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.ini-tipos__barra span {
+  flex-basis: 0;
+  min-width: 0;
+}
+
+.ini-tipos__pj,
+.ini-ponto--pj {
+  background: var(--color-primary-strong);
+}
+
+.ini-tipos__pf,
+.ini-ponto--pf {
+  background: color-mix(in srgb, var(--color-primary-strong) 35%, white);
+}
+
+.ini-tipos__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+}
+
+.ini-tipos__legenda > div {
+  display: grid;
+  gap: 2px;
+}
+
+.ini-tipos__legenda dt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.ini-tipos__legenda dd {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 0 0 18px;
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ini-tipos__legenda dd span {
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ini-ponto {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.ini-subtitulo {
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ini-regimes {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ini-regime {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 14px;
+}
+
+.ini-regime__nome {
+  color: var(--ink-2);
+}
+
+.ini-regime__trilho {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.ini-regime__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-primary-strong);
+}
+
+.ini-regime__fill--neutro {
+  background: var(--line-strong);
+}
+
+.ini-regime__qtd {
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Listas de clientes ---------- */
+
+.ini-lista {
+  display: grid;
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-3)) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ini-lista li + li {
+  border-top: 1px solid var(--line);
+}
+
+.ini-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  color: inherit;
+  text-decoration: none;
+}
+
+.ini-item:hover {
+  background: var(--surface-2);
+}
+
+.ini-item__texto {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ini-item__nome {
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ini-item__doc {
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+.ini-item__seta {
+  flex: none;
+  color: var(--ink-3);
+}
+
+.ini-acao {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary-strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ini-recente__meta {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ini-data {
+  color: var(--ink-3);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ini-lista__skeleton {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* ---------- Equipe (só administrador) ---------- */
+
+.ini-equipe {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+}
+
+.ini-equipe__texto {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* ---------- Telas menores ---------- */
+
+@media (max-width: 1099px) {
   .ini-numeros {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--space-5);
   }
 
-  .ini-numero,
-  .ini-numero:first-child {
-    padding: var(--space-3) 0;
-    border-top: 1px solid var(--line);
+  .ini-numero:nth-child(3) {
+    padding-left: 0;
     border-left: 0;
   }
+}
 
-  .ini-numero:first-child {
-    border-top: 0;
+@media (max-width: 899px) {
+  .ini-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 599px) {
+  .ini-carteira,
+  .ini-painel {
+    padding: var(--space-4);
+  }
+
+  .ini-numeros {
+    margin-top: var(--space-4);
+    row-gap: var(--space-4);
+  }
+
+  .ini-numero {
+    padding: 0 0 0 var(--space-4);
+  }
+
+  .ini-numero:nth-child(3) {
+    padding-left: 0;
+  }
+
+  .ini-numero__valor {
+    font-size: 28px;
+  }
+
+  .ini-grafico {
+    gap: var(--space-2);
+    min-height: 168px;
+  }
+
+  .ini-regime {
+    grid-template-columns: 112px minmax(0, 1fr) 28px;
+    font-size: 13px;
+  }
+
+  .ini-recente__meta .badge,
+  .ini-equipe .ini-vazio__icon {
+    display: none;
+  }
+
+  .ini-acao {
+    font-size: 12.5px;
+  }
+
+  .ini-equipe {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+    padding: var(--space-4);
   }
 }
