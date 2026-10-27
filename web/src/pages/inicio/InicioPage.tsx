@@ -1,13 +1,23 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertIcon, ChevronRightIcon, KeyIcon, PlusIcon, UsersIcon } from '../../components/icons'
+import { AlertIcon, ChevronRightIcon, KeyIcon, PlusIcon, ReceiptIcon, UsersIcon } from '../../components/icons'
 import { useAuth } from '../../features/auth/useAuth'
 import { formatarDocumento } from '../../features/clientes/documento'
 import { formatarData, pluralizar } from '../../features/clientes/formatar'
 import { REGIMES } from '../../features/clientes/types'
 import { buscarDashboard } from '../../features/dashboard/dashboardService'
 import { comparacaoMes, mesCurto, mesLongoComAno } from '../../features/dashboard/meses'
-import type { CadastrosNoMes, ClienteResumo, Composicao, Dashboard } from '../../features/dashboard/types'
+import type {
+  CadastrosNoMes,
+  ClienteResumo,
+  Composicao,
+  Dashboard,
+  LancamentoResumo,
+  LancamentosMes,
+} from '../../features/dashboard/types'
+import { formatarDia, formatarMoeda } from '../../features/lancamentos/formatar'
+import { ROTULO_TIPO, TIPOS } from '../../features/lancamentos/types'
+import '../../features/lancamentos/lancamentos.css'
 import { useTenantTheme } from '../../hooks/useTenantTheme'
 import { PageHeader } from '../../layouts/PageHeader'
 import '../../features/clientes/clientes.css'
@@ -144,6 +154,11 @@ export function InicioPage() {
 
           {!vazio && (
             <>
+              <div className="ini-grade">
+                <PainelLancamentosMes dados={dados?.lancamentosMes ?? null} />
+                <UltimosLancamentos itens={dados?.ultimosLancamentos ?? null} />
+              </div>
+
               <div className="ini-grade">
                 <GraficoNovos serie={dados ? serie : null} />
                 <PainelComposicao composicao={dados?.composicao ?? null} />
@@ -339,6 +354,115 @@ function PainelComposicao({ composicao }: { composicao: Composicao | null }) {
             </ul>
           )}
         </>
+      )}
+    </section>
+  )
+}
+
+// Totais do mês atual por tipo, com a comparação com o mês anterior; cada tipo leva à lista já filtrada.
+function PainelLancamentosMes({ dados }: { dados: LancamentosMes | null }) {
+  const maior = Math.max(1, ...(dados?.porTipo ?? []).map((t) => t.valor))
+  const [ano, mes] = (dados?.mes ?? '2000-01').split('-').map(Number)
+  const ultimoDia = new Date(ano, mes, 0).getDate()
+  const periodo = dados ? `de=${dados.mes}-01&ate=${dados.mes}-${String(ultimoDia).padStart(2, '0')}` : ''
+  const variacao =
+    dados && dados.valorTotalMesAnterior > 0
+      ? Math.round(((dados.valorTotal - dados.valorTotalMesAnterior) / dados.valorTotalMesAnterior) * 100)
+      : null
+  return (
+    <section className="panel ini-painel" aria-labelledby="ini-lanc-mes-titulo">
+      <div className="ini-head">
+        <h2 id="ini-lanc-mes-titulo">Lançamentos de {dados ? mesLongoComAno(dados.mes) : '…'}</h2>
+        <Link to={`/app/lancamentos?${periodo}`} className="ini-link">
+          Ver lançamentos
+        </Link>
+      </div>
+      {dados === null ? (
+        <span className="ui-skeleton ini-grafico__skeleton" />
+      ) : dados.quantidade === 0 ? (
+        <div className="ini-vazio">
+          <span className="ini-vazio__icon" aria-hidden="true">
+            <ReceiptIcon width={24} height={24} />
+          </span>
+          <div>
+            <p className="ini-vazio__titulo">Nenhum lançamento neste mês</p>
+            <p className="ini-msg">
+              {dados.valorTotalMesAnterior > 0
+                ? `No mês passado foram ${formatarMoeda(dados.valorTotalMesAnterior)}.`
+                : 'Os lançamentos do escritório e dos clientes pelo app aparecem aqui.'}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="ini-lanc-total">
+            <span className="ini-lanc-total__valor">{formatarMoeda(dados.valorTotal)}</span>
+            <span className="ini-msg">
+              {pluralizar(dados.quantidade, 'lançamento', 'lançamentos')}
+              {variacao !== null &&
+                ` · ${variacao === 0 ? 'igual ao' : `${Math.abs(variacao)}% ${variacao > 0 ? 'acima do' : 'abaixo do'}`} mês passado`}
+            </span>
+          </div>
+          <ul className="ini-regimes">
+            {TIPOS.map((t) => {
+              const total = dados.porTipo.find((p) => p.tipo === t.valor)
+              const valor = total?.valor ?? 0
+              return (
+                <li key={t.valor}>
+                  <Link to={`/app/lancamentos?tipo=${t.valor}&${periodo}`} className="ini-regime ini-lanc-tipo">
+                    <span className="ini-regime__nome">
+                      <span className="lc-ponto" data-tipo={t.valor} aria-hidden="true" /> {t.plural}
+                    </span>
+                    <span className="ini-regime__trilho" aria-hidden="true">
+                      <span className="ini-lanc-tipo__fill" data-tipo={t.valor} style={{ width: `${(valor / maior) * 100}%` }} />
+                    </span>
+                    <span className="ini-regime__qtd ini-lanc-tipo__valor">{formatarMoeda(valor)}</span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </>
+      )}
+    </section>
+  )
+}
+
+function UltimosLancamentos({ itens }: { itens: LancamentoResumo[] | null }) {
+  return (
+    <section className="panel ini-painel" aria-labelledby="ini-ultimos-lanc-titulo">
+      <div className="ini-head">
+        <h2 id="ini-ultimos-lanc-titulo">Últimos lançamentos</h2>
+        <Link to="/app/lancamentos" className="ini-link">
+          Ver todos
+        </Link>
+      </div>
+      {itens === null ? (
+        <div className="ini-lista__skeleton">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="ui-skeleton" style={{ height: 40 }} />
+          ))}
+        </div>
+      ) : itens.length === 0 ? (
+        <p className="ini-msg">Nenhum lançamento ainda.</p>
+      ) : (
+        <ul className="ini-lista">
+          {itens.map((l) => (
+            <li key={l.id}>
+              <Link to={`/app/clientes/${l.clienteId}`} className="ini-item">
+                <span className="ini-item__texto">
+                  <span className="ini-item__nome">{l.descricao}</span>
+                  <span className="ini-item__doc">
+                    {l.clienteNome} · {ROTULO_TIPO[l.tipo]} · {formatarDia(l.data)}
+                    {l.origem === 'CLIENTE' ? ' · pelo app' : ''}
+                  </span>
+                </span>
+                <span className="ini-lanc-valor">{formatarMoeda(l.valor)}</span>
+                <ChevronRightIcon width={16} height={16} className="ini-item__seta" />
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   )

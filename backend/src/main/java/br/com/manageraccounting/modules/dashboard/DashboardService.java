@@ -1,10 +1,12 @@
 package br.com.manageraccounting.modules.dashboard;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -16,17 +18,20 @@ import br.com.manageraccounting.modules.cliente.TipoPessoa;
 import br.com.manageraccounting.modules.dashboard.DashboardConsultas.ContagemCarteira;
 import br.com.manageraccounting.modules.dashboard.DashboardConsultas.ContagemComposicao;
 import br.com.manageraccounting.modules.dashboard.DashboardConsultas.ContagemEquipe;
+import br.com.manageraccounting.modules.dashboard.DashboardConsultas.SomaPorTipo;
 import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse;
 import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.CadastrosNoMes;
 import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.Carteira;
 import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.ClientesSemAcesso;
 import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.Composicao;
 import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.Equipe;
+import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.LancamentosMes;
+import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.TotalTipo;
 import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.RegimeQuantidade;
+import br.com.manageraccounting.modules.lancamento.TipoLancamento;
 
 /**
- * Monta a página inicial do escritório com os dados que já existem (clientes, acesso ao app e equipe).
- * Os números de lançamentos entram aqui quando o módulo de lançamentos existir.
+ * Monta a página inicial do escritório: clientes, acesso ao app, lançamentos do mês e equipe.
  */
 @Service
 public class DashboardService {
@@ -74,8 +79,28 @@ public class DashboardService {
             equipe = new Equipe(e.usuariosAtivos(), e.convitesPendentes());
         }
 
+        LancamentosMes lancamentosMes = lancamentosMes(mesAtual,
+                consultas.lancamentosPorTipo(tenantId, mesAtual.atDay(1), mesAtual.atEndOfMonth()),
+                consultas.lancamentosPorTipo(tenantId, mesAtual.minusMonths(1).atDay(1),
+                        mesAtual.minusMonths(1).atEndOfMonth()));
+
         return new DashboardResponse(carteira, serie, composicao(consultas.composicao(tenantId)), semAcessoApp,
-                consultas.recentes(tenantId, LIMITE_LISTAS), equipe);
+                consultas.recentes(tenantId, LIMITE_LISTAS), lancamentosMes,
+                consultas.ultimosLancamentos(tenantId, LIMITE_LISTAS), equipe);
+    }
+
+    /** Os três tipos sempre aparecem (com zero quando não houve lançamento), na ordem do enum. */
+    static LancamentosMes lancamentosMes(YearMonth mes, List<SomaPorTipo> atual, List<SomaPorTipo> anterior) {
+        List<TotalTipo> porTipo = Arrays.stream(TipoLancamento.values())
+                .map(t -> atual.stream().filter(s -> s.tipo() == t).findFirst()
+                        .map(s -> new TotalTipo(t, s.quantidade(), s.valor().setScale(2)))
+                        .orElseGet(() -> new TotalTipo(t, 0, BigDecimal.ZERO.setScale(2))))
+                .toList();
+        long quantidade = porTipo.stream().mapToLong(TotalTipo::quantidade).sum();
+        BigDecimal total = porTipo.stream().map(TotalTipo::valor).reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add);
+        BigDecimal totalAnterior = anterior.stream().map(SomaPorTipo::valor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2);
+        return new LancamentosMes(mes.toString(), porTipo, quantidade, total, totalAnterior);
     }
 
     /** Completa com zero os meses sem cadastro, do primeiro mês até o atual. */

@@ -7,6 +7,7 @@ import {
   HomeIcon,
   LogoutIcon,
   MenuIcon,
+  ReceiptIcon,
   ShieldIcon,
   UsersIcon,
 } from '../components/icons'
@@ -20,6 +21,7 @@ import './backoffice.css'
 const NAV = [
   { to: '/app', label: 'Visão geral', icon: HomeIcon, end: true, soAdmin: false },
   { to: '/app/clientes', label: 'Clientes', icon: UsersIcon, end: false, soAdmin: false },
+  { to: '/app/lancamentos', label: 'Lançamentos', icon: ReceiptIcon, end: false, soAdmin: false },
   { to: '/app/usuarios', label: 'Usuários', icon: ShieldIcon, end: false, soAdmin: true },
 ]
 

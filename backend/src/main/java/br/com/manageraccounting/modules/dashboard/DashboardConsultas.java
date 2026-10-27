@@ -1,9 +1,12 @@
 package br.com.manageraccounting.modules.dashboard;
 
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
@@ -17,6 +20,9 @@ import org.springframework.stereotype.Repository;
 import br.com.manageraccounting.modules.cliente.RegimeTributario;
 import br.com.manageraccounting.modules.cliente.TipoPessoa;
 import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.ClienteResumo;
+import br.com.manageraccounting.modules.dashboard.dto.DashboardResponse.LancamentoResumo;
+import br.com.manageraccounting.modules.lancamento.CategoriaLancamento;
+import br.com.manageraccounting.modules.lancamento.TipoLancamento;
 
 /**
  * Consultas de agregação do dashboard, em SQL direto (contagens e agrupamentos por mês ficam bem mais simples
@@ -46,6 +52,9 @@ public class DashboardConsultas {
     }
 
     public record ContagemEquipe(long usuariosAtivos, long convitesPendentes) {
+    }
+
+    public record SomaPorTipo(TipoLancamento tipo, long quantidade, BigDecimal valor) {
     }
 
     public ContagemCarteira carteira(Long tenantId) {
@@ -137,6 +146,45 @@ public class DashboardConsultas {
                 """;
         return jdbc.queryForObject(sql, tenant(tenantId).addValue("agora", Timestamp.from(agora)),
                 (rs, i) -> new ContagemEquipe(rs.getLong("usuarios_ativos"), rs.getLong("convites_pendentes")));
+    }
+
+    /** Lançamentos não excluídos com data entre {@code de} e {@code ate} (inclusive), somados por tipo. */
+    public List<SomaPorTipo> lancamentosPorTipo(Long tenantId, LocalDate de, LocalDate ate) {
+        String sql = """
+                select l.tipo, count(*) as quantidade, coalesce(sum(l.valor), 0) as valor
+                from lancamento l
+                where l.tenant_id = :tenantId and l.excluido_em is null and l.data between :de and :ate
+                group by l.tipo
+                """;
+        MapSqlParameterSource params = tenant(tenantId)
+                .addValue("de", Date.valueOf(de))
+                .addValue("ate", Date.valueOf(ate));
+        return jdbc.query(sql, params, (rs, i) -> new SomaPorTipo(
+                TipoLancamento.valueOf(rs.getString("tipo")), rs.getLong("quantidade"), rs.getBigDecimal("valor")));
+    }
+
+    /** Últimos lançamentos (não excluídos) pela data de cadastro, com o nome do cliente. */
+    public List<LancamentoResumo> ultimosLancamentos(Long tenantId, int limite) {
+        String sql = """
+                select l.id, l.cliente_id, c.nome as cliente_nome, l.tipo, l.data, l.descricao, l.valor,
+                       l.categoria, l.origem, l.criado_em
+                from lancamento l
+                join cliente c on c.id = l.cliente_id and c.tenant_id = l.tenant_id
+                where l.tenant_id = :tenantId and l.excluido_em is null
+                order by l.criado_em desc, l.id desc
+                limit :limite
+                """;
+        return jdbc.query(sql, tenant(tenantId).addValue("limite", limite), (rs, i) -> new LancamentoResumo(
+                rs.getLong("id"),
+                rs.getLong("cliente_id"),
+                rs.getString("cliente_nome"),
+                TipoLancamento.valueOf(rs.getString("tipo")),
+                rs.getDate("data").toLocalDate(),
+                rs.getString("descricao"),
+                rs.getBigDecimal("valor"),
+                CategoriaLancamento.valueOf(rs.getString("categoria")),
+                rs.getString("origem"),
+                rs.getTimestamp("criado_em").toInstant()));
     }
 
     private static MapSqlParameterSource tenant(Long tenantId) {

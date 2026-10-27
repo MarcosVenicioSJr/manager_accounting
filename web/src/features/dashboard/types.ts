@@ -1,4 +1,5 @@
 import type { RegimeTributario, TipoPessoa } from '../clientes/types'
+import type { OrigemLancamento, TipoLancamento, TotalTipo } from '../lancamentos/types'
 
 // Resposta de GET /api/dashboard (ver DashboardResponse.java)
 
@@ -34,12 +35,36 @@ export type ClienteResumo = {
   dataInclusao: string
 }
 
+// mes no formato "2026-10"; porTipo traz sempre os três tipos
+export type LancamentosMes = {
+  mes: string
+  porTipo: TotalTipo[]
+  quantidade: number
+  valorTotal: number
+  valorTotalMesAnterior: number
+}
+
+export type LancamentoResumo = {
+  id: number
+  clienteId: number
+  clienteNome: string
+  tipo: TipoLancamento
+  data: string
+  descricao: string
+  valor: number
+  categoria: string
+  origem: OrigemLancamento
+  criadoEm: string
+}
+
 export type Dashboard = {
   carteira: Carteira
   novosPorMes: CadastrosNoMes[]
   composicao: Composicao
   semAcessoApp: { total: number; itens: ClienteResumo[] }
   recentes: ClienteResumo[]
+  lancamentosMes: LancamentosMes
+  ultimosLancamentos: LancamentoResumo[]
   // Só vem para administradores
   equipe: { usuariosAtivos: number; convitesPendentes: number } | null
 }

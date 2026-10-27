@@ -269,6 +269,10 @@ body {
   box-shadow: 0 24px 64px rgba(10, 18, 32, 0.28);
 }
 
+.ui-dialog--larga {
+  width: min(640px, calc(100vw - 32px));
+}
+
 .ui-dialog::backdrop {
   background: rgba(10, 18, 32, 0.48);
 }

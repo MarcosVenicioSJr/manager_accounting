@@ -7,18 +7,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Texto de busca do cliente: minúsculas e sem acentos, para "joao" encontrar "João".
+ * Texto de busca (clientes e lançamentos): minúsculas e sem acentos, para "joao" encontrar "João".
  * O mesmo tratamento é aplicado ao termo digitado na busca.
  */
-final class TextoBusca {
+public final class TextoBusca {
 
     static final int TAMANHO_MAXIMO = 500;
 
     private TextoBusca() {
     }
 
-    /** "João Ação" → "joao acao". */
-    static String normalizar(String texto) {
+    /** "João Ação" → "joao acao". Também usado na busca da descrição dos lançamentos. */
+    public static String normalizar(String texto) {
         if (texto == null) {
             return "";
         }
