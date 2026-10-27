@@ -3,7 +3,7 @@ projeto: manager_accounting
 registro: 013
 titulo: Relatórios (extrato do cliente e resumo do escritório)
 data: 2026-10-26
-status: em revisão (branch feature/relatorios, ainda não validado no Maven)
+status: concluído (na main desde 26/10/2026; falta rodar mvn test localmente)
 modulo: relatorios
 tags:
   - manager_accounting
