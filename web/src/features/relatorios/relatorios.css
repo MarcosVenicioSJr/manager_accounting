@@ -1,0 +1,100 @@
+/* Relatórios: dois cartões lado a lado (um embaixo do outro em telas menores). */
+
+.rl-grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.rl-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-5);
+}
+
+.rl-cartao .ui-alert {
+  margin: 0;
+}
+
+.rl-cartao__topo {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.rl-cartao__topo h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.rl-cartao__topo p {
+  margin: 4px 0 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.rl-cartao__icone {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-primary-strong) 10%, white);
+  color: var(--color-primary-strong);
+}
+
+.rl-periodo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.rl-periodo .cl-filter {
+  align-self: flex-start;
+  flex-wrap: wrap;
+}
+
+.rl-periodo .cf-hint,
+.rl-periodo .cf-error {
+  margin: 0;
+}
+
+.rl-periodo__datas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+.rl-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 1099px) {
+  .rl-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 599px) {
+  .rl-periodo .cl-filter {
+    align-self: stretch;
+  }
+
+  .rl-botoes .ui-btn {
+    flex: 1 1 140px;
+    justify-content: center;
+  }
+}

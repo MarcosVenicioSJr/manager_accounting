@@ -11,6 +11,7 @@ import { LancamentosPage } from '../pages/lancamentos/LancamentosPage'
 import { LoginPage } from '../pages/login/LoginPage'
 import { NaoEncontradoPage } from '../pages/nao-encontrado/NaoEncontradoPage'
 import { PerfilPage } from '../pages/perfil/PerfilPage'
+import { RelatoriosPage } from '../pages/relatorios/RelatoriosPage'
 import { PrimeiroAcessoPage } from '../pages/primeiro-acesso/PrimeiroAcessoPage'
 import { RecuperarSenhaPage } from '../pages/recuperar-senha/RecuperarSenhaPage'
 import { RedefinirSenhaPage } from '../pages/redefinir-senha/RedefinirSenhaPage'
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
       { path: 'clientes/novo', element: <NovoClientePage /> },
       { path: 'clientes/:id', element: <ClienteDetalhePage /> },
       { path: 'lancamentos', element: <LancamentosPage /> },
+      { path: 'relatorios', element: <RelatoriosPage /> },
       { path: 'perfil', element: <PerfilPage /> },
       { path: 'usuarios', element: <UsuariosPage /> },
       { path: '*', element: <NaoEncontradoPage /> },
