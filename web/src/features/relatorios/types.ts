@@ -59,6 +59,31 @@ export type ResumoEscritorio = {
   clientesSemMovimento: number
 }
 
+export type LinhaCategoria = {
+  categoria: string | null
+  rotulo: string | null
+  quantidade: number
+  clientes: number
+  compras: number
+  dividas: number
+  despesas: number
+  total: number
+  // Fatia do total do período, de 0 a 100
+  percentual: number
+}
+
+// Resposta de GET /api/relatorios/categorias. cliente null = todos os clientes do escritório
+export type PorCategoria = {
+  escritorio: string
+  cliente: ExtratoCliente['cliente'] | null
+  de: string
+  ate: string
+  geradoEm: string
+  linhas: LinhaCategoria[]
+  totais: LinhaCategoria
+  clientes: number
+}
+
 export type Periodo = { de: string; ate: string }
 
 // Identidade visual usada nos arquivos (vem do tema do escritório)

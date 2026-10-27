@@ -35,6 +35,54 @@ public class RelatorioConsultas {
             long quantidade, BigDecimal compras, BigDecimal dividas, BigDecimal despesas) {
     }
 
+    public record LinhaCategoria(CategoriaLancamento categoria, long quantidade, long clientes, BigDecimal compras,
+            BigDecimal dividas, BigDecimal despesas) {
+    }
+
+    /**
+     * Totais por categoria no período, de um cliente ({@code clienteId}) ou de todos ({@code null}).
+     * Só voltam as categorias com lançamento.
+     */
+    public List<LinhaCategoria> porCategoria(Long tenantId, Long clienteId, LocalDate de, LocalDate ate) {
+        String sql = """
+                select l.categoria, count(*) as quantidade, count(distinct l.cliente_id) as clientes,
+                       coalesce(sum(l.valor) filter (where l.tipo = 'COMPRA'), 0) as compras,
+                       coalesce(sum(l.valor) filter (where l.tipo = 'DIVIDA'), 0) as dividas,
+                       coalesce(sum(l.valor) filter (where l.tipo = 'DESPESA'), 0) as despesas
+                from lancamento l
+                where l.tenant_id = :tenantId and l.excluido_em is null and l.data between :de and :ate
+                %s
+                group by l.categoria
+                """.formatted(clienteId == null ? "" : "and l.cliente_id = :clienteId");
+        MapSqlParameterSource params = periodo(tenantId, de, ate);
+        if (clienteId != null) {
+            params.addValue("clienteId", clienteId);
+        }
+        return jdbc.query(sql, params, (rs, i) -> new LinhaCategoria(
+                CategoriaLancamento.valueOf(rs.getString("categoria")),
+                rs.getLong("quantidade"),
+                rs.getLong("clientes"),
+                rs.getBigDecimal("compras"),
+                rs.getBigDecimal("dividas"),
+                rs.getBigDecimal("despesas")));
+    }
+
+    /** Quantos clientes diferentes lançaram no período (de todos, ou só o cliente informado). */
+    public long clientesComLancamento(Long tenantId, Long clienteId, LocalDate de, LocalDate ate) {
+        String sql = """
+                select count(distinct l.cliente_id)
+                from lancamento l
+                where l.tenant_id = :tenantId and l.excluido_em is null and l.data between :de and :ate
+                %s
+                """.formatted(clienteId == null ? "" : "and l.cliente_id = :clienteId");
+        MapSqlParameterSource params = periodo(tenantId, de, ate);
+        if (clienteId != null) {
+            params.addValue("clienteId", clienteId);
+        }
+        Long n = jdbc.queryForObject(sql, params, (rs, i) -> rs.getLong(1));
+        return n == null ? 0 : n;
+    }
+
     /** Lançamentos do cliente no período, do mais antigo para o mais recente. Traz até {@code limite} linhas. */
     public List<LinhaExtrato> extrato(Long tenantId, Long clienteId, LocalDate de, LocalDate ate, int limite) {
         String sql = """

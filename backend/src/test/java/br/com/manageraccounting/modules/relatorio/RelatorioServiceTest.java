@@ -31,8 +31,10 @@ import br.com.manageraccounting.modules.cliente.TipoPessoa;
 import br.com.manageraccounting.modules.lancamento.CategoriaLancamento;
 import br.com.manageraccounting.modules.lancamento.OrigemLancamento;
 import br.com.manageraccounting.modules.lancamento.TipoLancamento;
+import br.com.manageraccounting.modules.relatorio.RelatorioConsultas.LinhaCategoria;
 import br.com.manageraccounting.modules.relatorio.RelatorioConsultas.LinhaExtrato;
 import br.com.manageraccounting.modules.relatorio.RelatorioConsultas.LinhaResumo;
+import br.com.manageraccounting.modules.relatorio.dto.CategoriasResponse;
 import br.com.manageraccounting.modules.relatorio.dto.ExtratoClienteResponse;
 import br.com.manageraccounting.modules.relatorio.dto.ExtratoClienteResponse.TotalCategoria;
 import br.com.manageraccounting.modules.relatorio.dto.ExtratoClienteResponse.TotalTipo;
@@ -149,6 +151,43 @@ class RelatorioServiceTest {
         assertThat(r.totais().total()).isEqualTo(new BigDecimal("6930.50"));
         assertThat(r.clientesComMovimento()).isEqualTo(2);
         assertThat(r.clientesSemMovimento()).isEqualTo(2);
+    }
+
+    @Test
+    void porCategoriaDeTodosOrdenaECalculaPercentual() {
+        when(consultas.porCategoria(TENANT, null, DE, ATE)).thenReturn(List.of(
+                new LinhaCategoria(CategoriaLancamento.ALIMENTACAO, 2, 1, new BigDecimal("100"),
+                        new BigDecimal("50.5"), BigDecimal.ZERO),
+                new LinhaCategoria(CategoriaLancamento.ALUGUEL, 2, 2, BigDecimal.ZERO, BigDecimal.ZERO,
+                        new BigDecimal("2000"))));
+        when(consultas.clientesComLancamento(TENANT, null, DE, ATE)).thenReturn(2L);
+
+        CategoriasResponse r = service.porCategoria(TENANT, null, DE, ATE);
+
+        assertThat(r.cliente()).isNull();
+        assertThat(r.linhas()).extracting(CategoriasResponse.Linha::rotulo).containsExactly("Aluguel", "Alimentação");
+        assertThat(r.linhas().get(0).percentual()).isEqualTo(new BigDecimal("93.0"));
+        assertThat(r.linhas().get(1).percentual()).isEqualTo(new BigDecimal("7.0"));
+        assertThat(r.linhas().get(1).total()).isEqualTo(new BigDecimal("150.50"));
+        assertThat(r.totais().total()).isEqualTo(new BigDecimal("2150.50"));
+        assertThat(r.totais().quantidade()).isEqualTo(4);
+        assertThat(r.clientes()).isEqualTo(2);
+    }
+
+    @Test
+    void porCategoriaDeUmClienteValidaOEscritorio() {
+        when(consultas.porCategoria(TENANT, 100L, DE, ATE)).thenReturn(List.of());
+
+        CategoriasResponse r = service.porCategoria(TENANT, 100L, DE, ATE);
+
+        assertThat(r.cliente().nome()).isEqualTo("Padaria Pão Quente");
+        assertThat(r.linhas()).isEmpty();
+        assertThat(r.totais().total()).isEqualTo(new BigDecimal("0.00"));
+        assertThat(r.clientes()).isZero();
+        verify(consultas, never()).clientesComLancamento(anyLong(), any(), any(), any());
+
+        when(clienteRepository.findByIdAndTenantId(999L, TENANT)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.porCategoria(TENANT, 999L, DE, ATE)).isInstanceOf(NotFoundException.class);
     }
 
     private static LinhaExtrato linha(Long id, TipoLancamento tipo, CategoriaLancamento categoria, String valor) {

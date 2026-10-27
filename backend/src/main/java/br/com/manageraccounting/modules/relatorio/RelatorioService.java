@@ -1,6 +1,7 @@
 package br.com.manageraccounting.modules.relatorio;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -21,8 +22,10 @@ import br.com.manageraccounting.modules.cliente.Cliente;
 import br.com.manageraccounting.modules.cliente.ClienteRepository;
 import br.com.manageraccounting.modules.lancamento.CategoriaLancamento;
 import br.com.manageraccounting.modules.lancamento.TipoLancamento;
+import br.com.manageraccounting.modules.relatorio.RelatorioConsultas.LinhaCategoria;
 import br.com.manageraccounting.modules.relatorio.RelatorioConsultas.LinhaExtrato;
 import br.com.manageraccounting.modules.relatorio.RelatorioConsultas.LinhaResumo;
+import br.com.manageraccounting.modules.relatorio.dto.CategoriasResponse;
 import br.com.manageraccounting.modules.relatorio.dto.ExtratoClienteResponse;
 import br.com.manageraccounting.modules.relatorio.dto.ExtratoClienteResponse.ClienteRelatorio;
 import br.com.manageraccounting.modules.relatorio.dto.ExtratoClienteResponse.Item;
@@ -109,7 +112,57 @@ public class RelatorioService {
                 comMovimento, semMovimento);
     }
 
+    /**
+     * Gastos por categoria de um cliente ({@code clienteId}) ou de todos os clientes ({@code null}). O cliente pode
+     * estar inativo; de outro escritório responde "não encontrado".
+     */
+    @Transactional(readOnly = true)
+    public CategoriasResponse porCategoria(Long tenantId, Long clienteId, LocalDate de, LocalDate ate) {
+        validarPeriodo(de, ate);
+        ClienteRelatorio cliente = null;
+        if (clienteId != null) {
+            Cliente c = clienteRepository.findByIdAndTenantId(clienteId, tenantId)
+                    .orElseThrow(() -> new NotFoundException(MSG_CLIENTE_NAO_ENCONTRADO));
+            cliente = new ClienteRelatorio(c.getId(), c.getNome(), c.getNomeFantasia(), c.getTipoPessoa(),
+                    c.getDocumento(), c.isAtivo());
+        }
+
+        List<LinhaCategoria> brutas = consultas.porCategoria(tenantId, clienteId, de, ate);
+        BigDecimal totalGeral = soma(brutas.stream()
+                .map(l -> l.compras().add(l.dividas()).add(l.despesas()))
+                .toList());
+        List<CategoriasResponse.Linha> linhas = brutas.stream()
+                .map(l -> linhaCategoria(l, totalGeral))
+                .sorted(Comparator.comparing(CategoriasResponse.Linha::total).reversed()
+                        .thenComparing(l -> l.categoria().ordinal()))
+                .toList();
+
+        long clientes = brutas.isEmpty() ? 0 : consultas.clientesComLancamento(tenantId, clienteId, de, ate);
+        CategoriasResponse.Linha totais = new CategoriasResponse.Linha(null, null,
+                linhas.stream().mapToLong(CategoriasResponse.Linha::quantidade).sum(), clientes,
+                soma(linhas.stream().map(CategoriasResponse.Linha::compras).toList()),
+                soma(linhas.stream().map(CategoriasResponse.Linha::dividas).toList()),
+                soma(linhas.stream().map(CategoriasResponse.Linha::despesas).toList()),
+                totalGeral,
+                totalGeral.signum() > 0 ? new BigDecimal("100.0") : new BigDecimal("0.0"));
+
+        return new CategoriasResponse(nomeEscritorio(tenantId), cliente, de, ate, clock.instant(), linhas, totais,
+                clientes);
+    }
+
     // ---------- apoio ----------
+
+    private static CategoriasResponse.Linha linhaCategoria(LinhaCategoria l, BigDecimal totalGeral) {
+        BigDecimal compras = l.compras().setScale(2);
+        BigDecimal dividas = l.dividas().setScale(2);
+        BigDecimal despesas = l.despesas().setScale(2);
+        BigDecimal total = compras.add(dividas).add(despesas);
+        BigDecimal percentual = totalGeral.signum() > 0
+                ? total.multiply(BigDecimal.valueOf(100)).divide(totalGeral, 1, RoundingMode.HALF_UP)
+                : new BigDecimal("0.0");
+        return new CategoriasResponse.Linha(l.categoria(), l.categoria().getRotulo(), l.quantidade(), l.clientes(),
+                compras, dividas, despesas, total, percentual);
+    }
 
     static void validarPeriodo(LocalDate de, LocalDate ate) {
         if (de == null || ate == null) {
