@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { AlertIcon, DownloadIcon, ReceiptIcon, SpinnerIcon, UsersIcon } from '../../components/icons'
+import { AlertIcon, DownloadIcon, ReceiptIcon, ReportIcon, SpinnerIcon, UsersIcon } from '../../components/icons'
 import { useToast } from '../../components/ui/useToast'
 import { buscarCliente } from '../../features/clientes/clienteService'
 import '../../features/clientes/clientes.css'
@@ -9,7 +9,7 @@ import '../../features/lancamentos/lancamentos.css'
 import { periodoNoNome, salvarArquivo, slug } from '../../features/relatorios/arquivo'
 import { erroDoPeriodo, periodoDoAtalho, type Atalho } from '../../features/relatorios/periodo'
 import { PeriodoSeletor } from '../../features/relatorios/PeriodoSeletor'
-import { buscarExtrato, buscarResumo } from '../../features/relatorios/relatorioService'
+import { buscarExtrato, buscarPorCategoria, buscarResumo } from '../../features/relatorios/relatorioService'
 import '../../features/relatorios/relatorios.css'
 import type { Marca, Periodo } from '../../features/relatorios/types'
 import { useTenantTheme } from '../../hooks/useTenantTheme'
@@ -31,10 +31,11 @@ export function RelatoriosPage() {
 
   return (
     <>
-      <PageHeader titulo="Relatórios" subtitulo="Extrato de um cliente ou resumo do escritório, em PDF ou Excel" />
+      <PageHeader titulo="Relatórios" subtitulo="Extrato, resumo do escritório e gastos por categoria, em PDF ou Excel" />
       <div className="rl-grade">
         <CartaoExtrato marca={marca} />
         <CartaoResumo marca={marca} />
+        <CartaoCategorias marca={marca} />
       </div>
     </>
   )
@@ -221,6 +222,75 @@ function CartaoResumo({ marca }: { marca: Marca }) {
                 ? await (await import('../../features/relatorios/gerarPdf')).pdfResumo(dados, marca)
                 : await (await import('../../features/relatorios/gerarExcel')).excelResumo(dados, marca)
             return { blob, nome: `resumo-${slug(marca.escritorio)}-${periodoNoNome(periodo)}.${f}`, vazio: dados.totais.quantidade === 0 }
+          })
+        }
+      />
+    </section>
+  )
+}
+
+function CartaoCategorias({ marca }: { marca: Marca }) {
+  const [cliente, setCliente] = useState<ClienteEscolhido | null>(null)
+  const [atalho, setAtalho] = useState<Atalho>('mes')
+  const [periodo, setPeriodo] = useState<Periodo>(() => periodoDoAtalho('mes'))
+  const { gerando, erro, gerar } = useGeracao()
+  const erroPeriodo = erroDoPeriodo(periodo)
+
+  return (
+    <section className="panel rl-cartao" aria-labelledby="rl-categorias-titulo">
+      <div className="rl-cartao__topo">
+        <span className="rl-cartao__icone" aria-hidden="true">
+          <ReportIcon width={22} height={22} />
+        </span>
+        <div>
+          <h2 id="rl-categorias-titulo">Gastos por categoria</h2>
+          <p>Quanto foi gasto em cada categoria no período, com compras, dívidas, despesas e a fatia de cada uma.</p>
+        </div>
+      </div>
+
+      <div className="cf-field">
+        <label className="cf-label" htmlFor="rl-categorias-cliente">
+          Cliente <span className="cf-required">(opcional)</span>
+        </label>
+        <ClienteSeletor
+          id="rl-categorias-cliente"
+          valor={cliente}
+          onChange={setCliente}
+          status="TODOS"
+          placeholder="Todos os clientes, ou busque um"
+        />
+        <p className="cf-hint">{cliente ? 'Só os lançamentos deste cliente.' : 'Sem cliente escolhido, soma todos os clientes do escritório.'}</p>
+      </div>
+
+      <PeriodoSeletor
+        atalho={atalho}
+        periodo={periodo}
+        erro={atalho === 'outro' ? erroPeriodo : null}
+        onChange={(a, p) => {
+          setAtalho(a)
+          setPeriodo(p)
+        }}
+      />
+
+      {erro && (
+        <div className="ui-alert ui-alert--error" role="alert">
+          <AlertIcon />
+          <div className="ui-alert__content">{erro}</div>
+        </div>
+      )}
+
+      <Botoes
+        gerando={gerando}
+        desabilitado={Boolean(erroPeriodo)}
+        onGerar={(formato) =>
+          void gerar(formato, async (f) => {
+            const dados = await buscarPorCategoria(cliente?.id ?? null, periodo)
+            const blob =
+              f === 'pdf'
+                ? await (await import('../../features/relatorios/gerarPdf')).pdfPorCategoria(dados, marca)
+                : await (await import('../../features/relatorios/gerarExcel')).excelPorCategoria(dados, marca)
+            const quem = dados.cliente ? slug(dados.cliente.nome) : slug(marca.escritorio)
+            return { blob, nome: `categorias-${quem}-${periodoNoNome(periodo)}.${f}`, vazio: dados.totais.quantidade === 0 }
           })
         }
       />

@@ -6,7 +6,7 @@ import { formatarDocumento } from '../clientes/documento'
 import { formatarDia, formatarMoeda } from '../lancamentos/formatar'
 import { ROTULO_TIPO } from '../lancamentos/types'
 import { carregarLogo, geradoEmTexto, hexParaRgb, periodoPorExtenso } from './arquivo'
-import type { ExtratoCliente, Marca, ResumoEscritorio } from './types'
+import type { ExtratoCliente, Marca, PorCategoria, ResumoEscritorio } from './types'
 
 type Rgb = [number, number, number]
 
@@ -312,5 +312,92 @@ export async function pdfResumo(resumo: ResumoEscritorio, marca: Marca): Promise
   }
 
   rodapes(ctx, marca, titulo)
+  return doc.output('blob')
+}
+
+export async function pdfPorCategoria(dados: PorCategoria, marca: Marca): Promise<Blob> {
+  const ctx = novoDocumento()
+  ctx.cor = hexParaRgb(marca.cor)
+  const { doc } = ctx
+  const periodo = periodoPorExtenso(dados)
+  const titulo = 'Gastos por categoria'
+  const quem = dados.cliente ? dados.cliente.nome : 'Todos os clientes'
+  doc.setProperties({ title: `${titulo} - ${quem} - ${periodo}` })
+
+  let y = await cabecalho(ctx, marca, titulo, `${quem} · Período: ${periodo}`, dados.geradoEm)
+  const t = dados.totais
+  const lanc = (n: number) => (n === 1 ? '1 lançamento' : `${n} lançamentos`)
+  y = caixas(ctx, y, [
+    { rotulo: 'Compras', valor: formatarMoeda(t.compras), detalhe: 'no período', cor: COR_TIPO.COMPRA },
+    { rotulo: 'Dívidas', valor: formatarMoeda(t.dividas), detalhe: 'no período', cor: COR_TIPO.DIVIDA },
+    { rotulo: 'Despesas', valor: formatarMoeda(t.despesas), detalhe: 'no período', cor: COR_TIPO.DESPESA },
+    {
+      rotulo: 'Total',
+      valor: formatarMoeda(t.total),
+      detalhe: dados.cliente ? lanc(t.quantidade) : `${lanc(t.quantidade)} · ${dados.clientes} cliente(s)`,
+    },
+  ])
+
+  y = tituloSecao(ctx, y + 9, 'Por categoria')
+  if (dados.linhas.length === 0) {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9.5)
+    doc.setTextColor(...TINTA_2)
+    doc.text('Nenhum lançamento no período.', MARGEM, y + 5)
+  } else {
+    const comClientes = !dados.cliente
+    const pct = (v: number) => `${v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+    const cabecalhoTabela = ['Categoria', 'Lanç.', ...(comClientes ? ['Clientes'] : []), 'Compras', 'Dívidas', 'Despesas', 'Total', '% do total']
+    const colPct = cabecalhoTabela.length - 1
+    autoTable(doc, {
+      ...estiloTabela(ctx.cor),
+      startY: y,
+      styles: { ...estiloTabela(ctx.cor).styles, fontSize: 8 },
+      head: [cabecalhoTabela],
+      body: dados.linhas.map((l) => [
+        l.rotulo ?? '',
+        String(l.quantidade),
+        ...(comClientes ? [String(l.clientes)] : []),
+        formatarMoeda(l.compras),
+        formatarMoeda(l.dividas),
+        formatarMoeda(l.despesas),
+        formatarMoeda(l.total),
+        pct(l.percentual),
+      ]),
+      foot: [
+        [
+          'Total',
+          String(t.quantidade),
+          ...(comClientes ? [String(dados.clientes)] : []),
+          formatarMoeda(t.compras),
+          formatarMoeda(t.dividas),
+          formatarMoeda(t.despesas),
+          formatarMoeda(t.total),
+          pct(t.percentual),
+        ],
+      ],
+      showFoot: 'lastPage',
+      columnStyles: { [colPct]: { cellWidth: 30 } },
+      didParseCell: (data: CellHookData) => {
+        if (data.column.index >= 1) data.cell.styles.halign = 'right'
+        // Espaço à esquerda na coluna de % para a barrinha
+        if (data.column.index === colPct && data.section === 'body') data.cell.styles.cellPadding = { top: 2.2, bottom: 2.2, left: 14, right: 2 }
+      },
+      // Barrinha proporcional à fatia de cada categoria
+      didDrawCell: (data: CellHookData) => {
+        if (data.section !== 'body' || data.column.index !== colPct) return
+        const fatia = dados.linhas[data.row.index].percentual / 100
+        const largura = 11
+        const x = data.cell.x + 2
+        const yBarra = data.cell.y + data.cell.height / 2 - 1
+        doc.setFillColor(...LINHA)
+        doc.rect(x, yBarra, largura, 2, 'F')
+        doc.setFillColor(...ctx.cor)
+        doc.rect(x, yBarra, Math.max(0.4, largura * fatia), 2, 'F')
+      },
+    })
+  }
+
+  rodapes(ctx, marca, `${titulo} · ${quem}`)
   return doc.output('blob')
 }

@@ -30,6 +30,7 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 | 011 | [[011 - Dashboard]] | 2026-10-22 | Dashboard | Concluído (na `main`) |
 | 012 | [[012 - Lancamentos]] | 2026-10-26 | Lançamentos | Concluído (na `main`) |
 | 013 | [[013 - Relatorios]] | 2026-10-26 | Relatórios | Concluído (na `main`) |
+| 014 | [[014 - Relatorio por categoria]] | 2026-10-26 | Relatórios | Concluído (na `main`) |
 
 ## Módulos
 
@@ -45,7 +46,12 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 | Clientes: endereço com CEP e busca sem acento | Concluído (na `main`) |
 | Dashboard (página Início) | Concluído (na `main`) |
 | Lançamentos do cliente (compras, dívidas e despesas) | Concluído (na `main`) |
-| Relatórios (extrato do cliente e resumo do escritório, PDF e Excel) | Concluído (na `main`) |
+| Relatórios (extrato do cliente, resumo do escritório e gastos por categoria, PDF e Excel) | Concluído (na `main`) |
+| Importação de extrato bancário (OFX/CSV) | Escolhido (próximo) |
+| Importação de clientes por planilha | Escolhido |
+| Consulta de CNPJ (API gratuita) | Escolhido |
+| Indicadores por cliente | Escolhido |
+| Busca global | Escolhido |
 | Administração da plataforma (cadastro de escritórios sem SQL) | Por último, depois do app do cliente |
 | Tema e logo pelo backoffice | Descartado: cores e logo só pelo banco e pelo projeto web |
 | App do cliente (React Native) | Pendente |

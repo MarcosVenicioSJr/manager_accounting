@@ -4,7 +4,7 @@ import ExcelJS from 'exceljs'
 import { formatarDocumento } from '../clientes/documento'
 import { ROTULO_TIPO } from '../lancamentos/types'
 import { dataExcel, geradoEmTexto, periodoPorExtenso } from './arquivo'
-import type { ExtratoCliente, Marca, ResumoEscritorio } from './types'
+import type { ExtratoCliente, Marca, PorCategoria, ResumoEscritorio } from './types'
 
 const MOEDA = '"R$" #,##0.00;[Red]-"R$" #,##0.00'
 const DATA = 'dd/mm/yyyy'
@@ -172,6 +172,67 @@ export async function excelResumo(resumo: ResumoEscritorio, marca: Marca): Promi
   estiloTotal(total)
   if (resumo.linhas.length > 0) {
     aba.autoFilter = { from: { row: inicio.number, column: 1 }, to: { row: ultima, column: 8 } }
+  }
+  aba.views = [{ state: 'frozen', ySplit: inicio.number, showGridLines: false }]
+  return paraBlob(livro)
+}
+
+export async function excelPorCategoria(dados: PorCategoria, marca: Marca): Promise<Blob> {
+  const livro = novoLivro(marca)
+  const aba = livro.addWorksheet('Por categoria', { views: [{ showGridLines: false }] })
+  const comClientes = !dados.cliente
+  const quem = dados.cliente
+    ? `${dados.cliente.nome} · ${dados.cliente.tipoPessoa === 'JURIDICA' ? 'CNPJ' : 'CPF'} ${formatarDocumento(dados.cliente.documento, dados.cliente.tipoPessoa)}`
+    : `Todos os clientes (${dados.clientes} com lançamento no período)`
+  const cab = ['Categoria', 'Lançamentos', ...(comClientes ? ['Clientes'] : []), 'Compras', 'Dívidas', 'Despesas', 'Total', '% do total']
+  const n = cab.length
+  aba.columns = cab.map((_, i) => ({ width: i === 0 ? 32 : i === n - 1 ? 12 : i < (comClientes ? 3 : 2) ? 13 : 17 }))
+  cabecalho(aba, marca, 'Gastos por categoria', [quem, `Período: ${periodoPorExtenso(dados)}`], dados.geradoEm, n)
+  const inicio = aba.addRow(cab)
+  estiloCabecalhoTabela(inicio, marca)
+
+  // Colunas (1-based): valores começam depois de Categoria, Lançamentos e, se houver, Clientes
+  const c0 = comClientes ? 4 : 3
+  const letra = (col: number) => String.fromCharCode(64 + col)
+  const colTotal = c0 + 3
+  const primeira = inicio.number + 1
+  const ultima = inicio.number + dados.linhas.length
+  const celTotalGeral = `$${letra(colTotal)}$${ultima + 1}`
+
+  dados.linhas.forEach((l, i) => {
+    const r = inicio.number + 1 + i
+    const linha = aba.addRow([
+      l.rotulo,
+      l.quantidade,
+      ...(comClientes ? [l.clientes] : []),
+      l.compras,
+      l.dividas,
+      l.despesas,
+      { formula: `SUM(${letra(c0)}${r}:${letra(c0 + 2)}${r})`, result: l.total },
+      { formula: `IF(${celTotalGeral}=0,0,${letra(colTotal)}${r}/${celTotalGeral})`, result: l.percentual / 100 },
+    ])
+    for (let c = c0; c <= colTotal; c++) linha.getCell(c).numFmt = MOEDA
+    linha.getCell(n).numFmt = '0.0%'
+  })
+  if (dados.linhas.length === 0) {
+    aba.addRow(['Nenhum lançamento no período.']).getCell(1).font = { italic: true, color: { argb: CINZA } }
+  } else {
+    const soma = (col: number, valor: number) => ({ formula: `SUM(${letra(col)}${primeira}:${letra(col)}${ultima})`, result: valor })
+    const t = dados.totais
+    const total = aba.addRow([
+      'Total',
+      soma(2, t.quantidade),
+      ...(comClientes ? [dados.clientes] : []),
+      soma(c0, t.compras),
+      soma(c0 + 1, t.dividas),
+      soma(c0 + 2, t.despesas),
+      soma(colTotal, t.total),
+      t.total > 0 ? 1 : 0,
+    ])
+    for (let c = c0; c <= colTotal; c++) total.getCell(c).numFmt = MOEDA
+    total.getCell(n).numFmt = '0.0%'
+    estiloTotal(total)
+    aba.autoFilter = { from: { row: inicio.number, column: 1 }, to: { row: ultima, column: n } }
   }
   aba.views = [{ state: 'frozen', ySplit: inicio.number, showGridLines: false }]
   return paraBlob(livro)
