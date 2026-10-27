@@ -24,7 +24,7 @@ Terceiro relatório do menu **Relatórios**: **Gastos por categoria**, em PDF e 
 Foi a opção 7 da lista de sugestões, escolhida em 26/10/2026.
 
 - **Branch:** `feature/relatorio-categoria`.
-- **Pull request:** ver o link no fim do registro.
+- **Pull request:** https://github.com/MarcosVenicioSJr/manager_accounting/pull/9
 
 ## Regras
 
