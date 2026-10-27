@@ -17,8 +17,9 @@ import { ConfirmDialog } from '../../components/ui/Dialog'
 import { RowMenu } from '../../components/ui/RowMenu'
 import { useToast } from '../../components/ui/useToast'
 import { getErrorCode, getErrorMessage } from '../../services/errors'
+import { buscarCliente } from '../clientes/clienteService'
 import { pluralizar } from '../clientes/formatar'
-import type { ClienteEscolhido } from './ClienteSeletor'
+import { ClienteSeletor, type ClienteEscolhido } from './ClienteSeletor'
 import { ComprovanteDialog } from './ComprovanteDialog'
 import { formatarDia, formatarMoeda, hojeIso, mesDe } from './formatar'
 import { HistoricoDialog } from './HistoricoDialog'
@@ -50,6 +51,10 @@ function lerTipo(valor: string | null): TipoLancamento | undefined {
   return valor === 'COMPRA' || valor === 'DIVIDA' || valor === 'DESPESA' ? valor : undefined
 }
 
+function lerId(valor: string | null): number | undefined {
+  return valor && /^\d+$/.test(valor) ? Number(valor) : undefined
+}
+
 function lerData(valor: string | null): string | undefined {
   return valor && DATA.test(valor) ? valor : undefined
 }
@@ -59,8 +64,10 @@ function lerData(valor: string | null): string | undefined {
 export function LancamentosPainel({ cliente, cabecalho }: Props) {
   const { notify } = useToast()
   const [params, setParams] = useSearchParams()
+  // Na página geral o cliente pode vir do filtro (?cliente=id); na ficha do cliente é sempre ele
+  const clienteDoFiltro = cliente ? undefined : lerId(params.get('cliente'))
   const filtro: FiltroLancamentos = {
-    clienteId: cliente?.id,
+    clienteId: cliente?.id ?? clienteDoFiltro,
     tipo: lerTipo(params.get('tipo')),
     categoria: params.get('categoria') || undefined,
     de: lerData(params.get('de')),
@@ -77,6 +84,12 @@ export function LancamentosPainel({ cliente, cabecalho }: Props) {
   }
 
   const [categorias, setCategorias] = useState<Categoria[]>([])
+  // Nome do cliente do filtro: vem da escolha na busca ou, ao abrir um link com ?cliente=, da API
+  const [nomesClientes, setNomesClientes] = useState<Record<number, string>>({})
+  const clienteFiltrado: ClienteEscolhido | null =
+    clienteDoFiltro === undefined
+      ? null
+      : { id: clienteDoFiltro, nome: nomesClientes[clienteDoFiltro] ?? 'Carregando…' }
   const [tentativa, setTentativa] = useState(0)
   const chave = JSON.stringify([filtro, pagina, tentativa])
   const [resposta, setResposta] = useState<{ chave: string; dados: ListaLancamentos } | null>(null)
@@ -116,6 +129,19 @@ export function LancamentosPainel({ cliente, cabecalho }: Props) {
       .then(setCategorias)
       .catch(() => setCategorias([]))
   }, [])
+
+  useEffect(() => {
+    if (clienteDoFiltro === undefined || nomesClientes[clienteDoFiltro]) return
+    const controle = new AbortController()
+    buscarCliente(clienteDoFiltro, controle.signal)
+      .then((c) => setNomesClientes((atual) => ({ ...atual, [c.id]: c.nome })))
+      .catch(() => {
+        if (!controle.signal.aborted) {
+          setNomesClientes((atual) => ({ ...atual, [clienteDoFiltro]: 'Cliente não encontrado' }))
+        }
+      })
+    return () => controle.abort()
+  }, [clienteDoFiltro, nomesClientes])
 
   // Espera a pessoa parar de digitar antes de buscar
   useEffect(() => {
@@ -180,7 +206,9 @@ export function LancamentosPainel({ cliente, cabecalho }: Props) {
         : !filtro.de && !filtro.ate
           ? 'tudo'
           : 'outro'
-  const comFiltro = Boolean(filtro.tipo || filtro.categoria || filtro.de || filtro.ate || filtro.busca)
+  const comFiltro = Boolean(
+    clienteDoFiltro || filtro.tipo || filtro.categoria || filtro.de || filtro.ate || filtro.busca,
+  )
   const itens = resultado?.itens ?? []
   const total = resultado?.total ?? 0
   const inicio = total === 0 ? 0 : pagina * TAMANHO_PAGINA + 1
@@ -254,6 +282,22 @@ export function LancamentosPainel({ cliente, cabecalho }: Props) {
       </div>
 
       <div className="lc-filtros">
+        {!cliente && (
+          <div className="lc-filtros__cliente">
+            <ClienteSeletor
+              id="filtro-cliente"
+              valor={clienteFiltrado}
+              status="TODOS"
+              placeholder="Cliente: nome ou CPF/CNPJ"
+              rotulo="Filtrar por cliente"
+              onChange={(c) => {
+                if (c) setNomesClientes((atual) => ({ ...atual, [c.id]: c.nome }))
+                atualizarParams({ cliente: c ? String(c.id) : null, pagina: null })
+              }}
+            />
+          </div>
+        )}
+
         <div className="cl-search lc-filtros__busca">
           <label htmlFor="busca-lancamentos" className="sr-only">
             Buscar na descrição
@@ -349,7 +393,15 @@ export function LancamentosPainel({ cliente, cabecalho }: Props) {
             className="ui-btn ui-btn--ghost ui-btn--sm"
             onClick={() => {
               setTextoBusca('')
-              atualizarParams({ tipo: null, categoria: null, de: null, ate: null, busca: null, pagina: null })
+              atualizarParams({
+                cliente: null,
+                tipo: null,
+                categoria: null,
+                de: null,
+                ate: null,
+                busca: null,
+                pagina: null,
+              })
             }}
           >
             Limpar filtros
@@ -550,6 +602,7 @@ export function LancamentosPainel({ cliente, cabecalho }: Props) {
         open={formulario.aberto}
         lancamento={formulario.lancamento}
         clienteFixo={cliente ? { id: cliente.id, nome: cliente.nome } : undefined}
+        clienteInicial={!cliente && clienteFiltrado && nomesClientes[clienteFiltrado.id] ? clienteFiltrado : undefined}
         onClose={() => setFormulario({ aberto: false, lancamento: null })}
         onSalvo={(_, mensagem) => {
           setFormulario({ aberto: false, lancamento: null })

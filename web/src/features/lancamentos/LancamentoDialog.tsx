@@ -60,6 +60,8 @@ type Props = {
   lancamento: Lancamento | null
   // Cliente já definido (aba do cliente): o campo de cliente não aparece
   clienteFixo?: ClienteEscolhido
+  // Página geral filtrada por um cliente: o formulário novo já vem com ele (dá para trocar)
+  clienteInicial?: ClienteEscolhido
   onClose: () => void
   onSalvo: (lancamento: Lancamento, mensagem: string) => void
   // Outra pessoa alterou o lançamento antes (409): fecha e recarrega a lista
@@ -75,11 +77,12 @@ export function LancamentoDialog(props: Props) {
   return <Formulario key={props.lancamento?.id ?? 'novo'} {...props} />
 }
 
-function Formulario({ lancamento, clienteFixo, onClose, onSalvo, onConflito, onAviso }: Props) {
+function Formulario({ lancamento, clienteFixo, clienteInicial, onClose, onSalvo, onConflito, onAviso }: Props) {
   const idBase = useId()
   const hoje = hojeIso()
   const [valores, setValores] = useState<Valores>(() => ({
-    cliente: clienteFixo ?? (lancamento ? { id: lancamento.clienteId, nome: lancamento.clienteNome } : null),
+    cliente:
+      clienteFixo ?? (lancamento ? { id: lancamento.clienteId, nome: lancamento.clienteNome } : (clienteInicial ?? null)),
     tipo: lancamento?.tipo ?? 'DESPESA',
     data: lancamento?.data ?? hoje,
     valor: lancamento ? valorParaCampo(lancamento.valor) : '',

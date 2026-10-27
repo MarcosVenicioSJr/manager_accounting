@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { CloseIcon, SearchIcon } from '../../components/icons'
 import { listarClientes } from '../clientes/clienteService'
 import { formatarDocumento } from '../clientes/documento'
-import type { ClienteListaItem } from '../clientes/types'
+import type { ClienteListaItem, StatusFiltro } from '../clientes/types'
 
 export type ClienteEscolhido = { id: number; nome: string }
 
@@ -12,13 +12,27 @@ type Props = {
   onChange: (cliente: ClienteEscolhido | null) => void
   invalido?: boolean
   descritoPor?: string
+  // Formulário: só ativos (cliente inativo não recebe lançamento). Filtro da lista: todos.
+  status?: StatusFiltro
+  placeholder?: string
+  // Rótulo acessível quando não há <label> visível (filtro)
+  rotulo?: string
 }
 
 const ESPERA_MS = 250
 
 // Campo de busca de cliente (combobox): digita parte do nome, CPF/CNPJ ou e-mail e escolhe na lista.
-// Só aparecem clientes ativos, porque cliente inativo não recebe lançamento.
-export function ClienteSeletor({ id, valor, onChange, invalido, descritoPor }: Props) {
+// No formulário só aparecem clientes ativos, porque cliente inativo não recebe lançamento.
+export function ClienteSeletor({
+  id,
+  valor,
+  onChange,
+  invalido,
+  descritoPor,
+  status = 'ATIVOS',
+  placeholder = 'Buscar por nome, CPF/CNPJ ou e-mail',
+  rotulo,
+}: Props) {
   const [texto, setTexto] = useState('')
   const [aberto, setAberto] = useState(false)
   const [opcoes, setOpcoes] = useState<ClienteListaItem[] | null>(null)
@@ -31,7 +45,7 @@ export function ClienteSeletor({ id, valor, onChange, invalido, descritoPor }: P
     if (!aberto) return
     const controle = new AbortController()
     const timer = window.setTimeout(() => {
-      listarClientes({ busca: texto.trim(), status: 'ATIVOS', pagina: 0, tamanho: 8 }, controle.signal)
+      listarClientes({ busca: texto.trim(), status, pagina: 0, tamanho: 8 }, controle.signal)
         .then((pagina) => {
           setOpcoes(pagina.itens)
           setAtivo(0)
@@ -45,7 +59,7 @@ export function ClienteSeletor({ id, valor, onChange, invalido, descritoPor }: P
       window.clearTimeout(timer)
       controle.abort()
     }
-  }, [texto, aberto])
+  }, [texto, aberto, status])
 
   useEffect(() => {
     if (!aberto) return
@@ -64,7 +78,7 @@ export function ClienteSeletor({ id, valor, onChange, invalido, descritoPor }: P
 
   if (valor) {
     return (
-      <div className="lc-cliente-escolhido" data-invalid={invalido || undefined}>
+      <div className="lc-cliente-escolhido" data-invalid={invalido || undefined} aria-label={rotulo}>
         <span className="lc-cliente-escolhido__nome">{valor.nome}</span>
         <button
           type="button"
@@ -92,7 +106,8 @@ export function ClienteSeletor({ id, valor, onChange, invalido, descritoPor }: P
         aria-activedescendant={aberto && itens[ativo] ? `${listaId}-${itens[ativo].id}` : undefined}
         aria-invalid={invalido || undefined}
         aria-describedby={descritoPor}
-        placeholder="Buscar por nome, CPF/CNPJ ou e-mail"
+        placeholder={placeholder}
+        aria-label={rotulo}
         autoComplete="off"
         value={texto}
         onFocus={() => setAberto(true)}
@@ -120,13 +135,15 @@ export function ClienteSeletor({ id, valor, onChange, invalido, descritoPor }: P
         }}
       />
       {aberto && (
-        <ul className="lc-combo__lista" role="listbox" id={listaId} aria-label="Clientes ativos">
+        <ul className="lc-combo__lista" role="listbox" id={listaId} aria-label={status === 'ATIVOS' ? 'Clientes ativos' : 'Clientes'}>
           {erro ? (
             <li className="lc-combo__msg">Não foi possível buscar os clientes.</li>
           ) : opcoes === null ? (
             <li className="lc-combo__msg">Buscando…</li>
           ) : itens.length === 0 ? (
-            <li className="lc-combo__msg">Nenhum cliente ativo encontrado.</li>
+            <li className="lc-combo__msg">
+              {status === 'ATIVOS' ? 'Nenhum cliente ativo encontrado.' : 'Nenhum cliente encontrado.'}
+            </li>
           ) : (
             itens.map((c, i) => (
               <li
@@ -140,7 +157,10 @@ export function ClienteSeletor({ id, valor, onChange, invalido, descritoPor }: P
                 onMouseEnter={() => setAtivo(i)}
               >
                 <span className="lc-combo__nome">{c.nome}</span>
-                <span className="lc-combo__doc cl-mono">{formatarDocumento(c.documento, c.tipoPessoa)}</span>
+                <span className="lc-combo__doc cl-mono">
+                  {formatarDocumento(c.documento, c.tipoPessoa)}
+                  {!c.ativo && ' · inativo'}
+                </span>
               </li>
             ))
           )}

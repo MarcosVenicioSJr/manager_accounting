@@ -77,7 +77,8 @@ O dashboard (`GET /api/dashboard`) ganhou `lancamentosMes` (totais do mês atual
 
 ## Telas
 
-- **Menu Lançamentos** (`/app/lancamentos`): lançamentos de todos os clientes. No topo ficam os totais por tipo, e clicar num tipo filtra por ele. Os filtros são busca na descrição, categoria e período (tudo, este mês, mês passado ou datas livres), e ficam todos na URL.
+- **Menu Lançamentos** (`/app/lancamentos`): lançamentos de todos os clientes. No topo ficam os totais por tipo, e clicar num tipo filtra por ele. Os filtros são cliente, busca na descrição, categoria e período (tudo, este mês, mês passado ou datas livres), e ficam todos na URL.
+- **Filtro por cliente:** busca por nome ou CPF/CNPJ (com ou sem pontuação), incluindo clientes inativos. Fica na URL como `?cliente=<id>`, e ao abrir um link com ele o nome é carregado da API. Com o filtro ativo, "Novo lançamento" já vem com esse cliente (dá para trocar).
 - **Ficha do cliente:** seção "Lançamentos" abaixo do cadastro, com a mesma lista já filtrada pelo cliente.
 - **Novo e editar lançamento:** diálogo com busca de cliente (só ativos), tipo, data, valor em reais, descrição, categoria e comprovante (anexar, trocar ou remover).
 - **Menu de cada linha:** editar, ver comprovante, histórico e excluir (com confirmação).
