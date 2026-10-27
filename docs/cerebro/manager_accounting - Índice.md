@@ -28,7 +28,7 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 | 009 | [[009 - Usuarios do escritorio]] | 2026-10-21 | Usuários | Concluído (na `main`) |
 | 010 | [[010 - Ajustes nos clientes]] | 2026-10-21 | Clientes | Concluído (na `main`) |
 | 011 | [[011 - Dashboard]] | 2026-10-22 | Dashboard | Concluído (na `main`) |
-| 012 | [[012 - Lancamentos]] | 2026-10-26 | Lançamentos | Em revisão (branch `feature/lancamentos`) |
+| 012 | [[012 - Lancamentos]] | 2026-10-26 | Lançamentos | Concluído (na `main`) |
 
 ## Módulos
 
@@ -43,6 +43,6 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 | Usuários do escritório (perfis e convite) | Concluído (na `main`) |
 | Clientes: endereço com CEP e busca sem acento | Concluído (na `main`) |
 | Dashboard (página Início) | Concluído (na `main`) |
-| Lançamentos do cliente (compras, dívidas e despesas) | Em revisão (branch `feature/lancamentos`) |
+| Lançamentos do cliente (compras, dívidas e despesas) | Concluído (na `main`) |
 | Tema e logo pelo backoffice | Descartado: cores e logo só pelo banco e pelo projeto web |
 | App do cliente (React Native) | Pendente |

@@ -3,7 +3,7 @@ projeto: manager_accounting
 registro: 012
 titulo: Lançamentos do cliente
 data: 2026-10-26
-status: em revisão (branch feature/lancamentos, ainda não validado no Maven)
+status: concluído (na main desde 26/10/2026; falta rodar mvn test localmente)
 modulo: lancamentos
 tags:
   - manager_accounting
