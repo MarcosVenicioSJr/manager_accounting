@@ -163,3 +163,52 @@ export const SpinnerIcon = (p: IconProps) => (
     <path d="M12 3.5a8.5 8.5 0 1 1-8.5 8.5" />
   </Icon>
 )
+
+export const ReceiptIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M6 3.5h12v17l-2.4-1.6-2.4 1.6-2.4-1.6-2.4 1.6L6 20.5z" />
+    <path d="M9 8h6M9 11.5h6M9 15h3.5" />
+  </Icon>
+)
+
+export const PaperclipIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m19 11.5-6.9 6.9a4.4 4.4 0 0 1-6.2-6.2l7.4-7.4a2.9 2.9 0 0 1 4.1 4.1l-7.3 7.3a1.5 1.5 0 0 1-2.1-2.1l6.6-6.6" />
+  </Icon>
+)
+
+export const PencilIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4.5 19.5 5.4 15 15.6 4.8a2 2 0 0 1 2.8 0l.8.8a2 2 0 0 1 0 2.8L9 18.6z" />
+    <path d="m13.5 7 3.5 3.5" />
+  </Icon>
+)
+
+export const TrashIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12.5h9.4L17.5 7" />
+    <path d="M10.2 10.5v6M13.8 10.5v6" />
+  </Icon>
+)
+
+export const HistoryIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" />
+    <path d="M4.5 4.5v4h4" />
+    <path d="M12 8v4.5l3 1.8" />
+  </Icon>
+)
+
+export const DownloadIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 4v11M7.5 10.5 12 15l4.5-4.5" />
+    <path d="M5 19.5h14" />
+  </Icon>
+)
+
+export const UploadIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 15V4M7.5 8.5 12 4l4.5 4.5" />
+    <path d="M5 19.5h14" />
+  </Icon>
+)

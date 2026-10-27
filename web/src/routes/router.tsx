@@ -7,6 +7,7 @@ import { ConfirmarAlteracaoPage } from '../pages/confirmar-alteracao/ConfirmarAl
 import { ClientesPage } from '../pages/clientes/ClientesPage'
 import { NovoClientePage } from '../pages/clientes/NovoClientePage'
 import { InicioPage } from '../pages/inicio/InicioPage'
+import { LancamentosPage } from '../pages/lancamentos/LancamentosPage'
 import { LoginPage } from '../pages/login/LoginPage'
 import { NaoEncontradoPage } from '../pages/nao-encontrado/NaoEncontradoPage'
 import { PerfilPage } from '../pages/perfil/PerfilPage'
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: 'clientes', element: <ClientesPage /> },
       { path: 'clientes/novo', element: <NovoClientePage /> },
       { path: 'clientes/:id', element: <ClienteDetalhePage /> },
+      { path: 'lancamentos', element: <LancamentosPage /> },
       { path: 'perfil', element: <PerfilPage /> },
       { path: 'usuarios', element: <UsuariosPage /> },
       { path: '*', element: <NaoEncontradoPage /> },

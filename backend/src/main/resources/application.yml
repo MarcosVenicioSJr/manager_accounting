@@ -15,6 +15,12 @@ spring:
       hibernate:
         format_sql: true
 
+  # Envio de comprovantes: 10 MB por arquivo (o limite da aplicação está em app.lancamentos.comprovante)
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -87,3 +93,10 @@ app:
   dashboard:
     # Fuso usado para dizer em que mês cada cliente foi cadastrado (o banco guarda as datas em UTC)
     fuso-horario: ${DASHBOARD_FUSO_HORARIO:America/Sao_Paulo}
+  lancamentos:
+    # Fuso usado para saber que dia é "hoje" (a data de um lançamento não pode ser no futuro)
+    fuso-horario: ${LANCAMENTOS_FUSO_HORARIO:America/Sao_Paulo}
+    comprovante:
+      # Pasta dos comprovantes (uma subpasta por escritório). Em produção, um volume persistente com backup.
+      diretorio: ${COMPROVANTES_DIRETORIO:./data/comprovantes}
+      tamanho-maximo: ${COMPROVANTES_TAMANHO_MAXIMO:10MB}

@@ -19,3 +19,7 @@ dist/
 !.vscode/extensions.json
 .DS_Store
 Thumbs.db
+
+# Comprovantes gravados em disco no desenvolvimento
+backend/data/
+data/comprovantes/

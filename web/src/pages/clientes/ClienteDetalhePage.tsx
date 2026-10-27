@@ -14,6 +14,7 @@ import {
 } from '../../features/clientes/clienteService'
 import { formatarDocumento } from '../../features/clientes/documento'
 import { formatarDataHora } from '../../features/clientes/formatar'
+import { LancamentosPainel } from '../../features/lancamentos/LancamentosPainel'
 import type { Cliente } from '../../features/clientes/types'
 import '../../features/clientes/clientes.css'
 import { useAuth } from '../../features/auth/useAuth'
@@ -214,6 +215,8 @@ function ClienteDetalhe({ id }: { id: string }) {
           </section>
         </aside>
       </div>
+
+      <LancamentosPainel cliente={{ id: cliente.id, nome: cliente.nome, ativo: cliente.ativo }} />
 
       <ConfirmDialog
         open={confirmarStatus}

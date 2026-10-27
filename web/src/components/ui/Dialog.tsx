@@ -10,6 +10,8 @@ type DialogProps = {
   busy?: boolean
   // false: clicar fora não fecha (para conteúdo que não pode se perder por engano, como um token)
   fecharPeloFundo?: boolean
+  // "larga" para formulários e pré-visualizações (até 640px)
+  largura?: 'padrao' | 'larga'
 }
 
 // Diálogo modal com o <dialog> nativo: prende o foco, fecha com Esc e devolve o foco a quem abriu.
@@ -21,6 +23,7 @@ export function Dialog({
   actions,
   busy = false,
   fecharPeloFundo = true,
+  largura = 'padrao',
 }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
@@ -35,7 +38,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
-      className="ui-dialog"
+      className={largura === 'larga' ? 'ui-dialog ui-dialog--larga' : 'ui-dialog'}
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault()
