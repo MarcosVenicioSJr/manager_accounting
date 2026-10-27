@@ -5,6 +5,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CloseIcon,
+  DownloadIcon,
   HistoryIcon,
   PaperclipIcon,
   PencilIcon,
@@ -236,7 +237,13 @@ export function LancamentosPainel({ cliente, cabecalho }: Props) {
                 : 'Cliente inativo: os lançamentos continuam aqui, mas não dá para lançar novos.'}
             </p>
           </div>
-          {botaoNovo}
+          <div className="lc-secao-head__acoes">
+            <Link to={`/app/relatorios?cliente=${cliente.id}`} className="ui-btn ui-btn--secondary">
+              <DownloadIcon width={18} height={18} />
+              Exportar extrato
+            </Link>
+            {botaoNovo}
+          </div>
         </div>
       )}
 

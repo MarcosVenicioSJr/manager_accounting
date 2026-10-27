@@ -41,6 +41,12 @@
   border-top: 1px solid var(--line);
 }
 
+.lc-secao-head__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .lc-secao-head__titulo {
   margin: 0;
   font-size: 18px;
@@ -320,7 +326,7 @@ button.lc-total[aria-pressed='true'] {
   pointer-events: none;
 }
 
-.lc-moeda__input {
+.lc-moeda .lc-moeda__input {
   padding-left: 40px;
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -416,7 +422,7 @@ button.lc-total[aria-pressed='true'] {
   pointer-events: none;
 }
 
-.lc-combo__input {
+.lc-combo .lc-combo__input {
   padding-left: 38px;
 }
 
@@ -691,8 +697,12 @@ button.lc-total[aria-pressed='true'] {
     text-align: left !important;
   }
 
-  .lc-secao-head .ui-btn {
+  .lc-secao-head__acoes {
     width: 100%;
+  }
+
+  .lc-secao-head .ui-btn {
+    flex: 1 1 160px;
     justify-content: center;
   }
 }

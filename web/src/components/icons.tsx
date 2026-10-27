@@ -212,3 +212,11 @@ export const UploadIcon = (p: IconProps) => (
     <path d="M5 19.5h14" />
   </Icon>
 )
+
+export const ReportIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M6.5 3.5h7.5l4 4v13h-11.5z" />
+    <path d="M13.5 3.5v4.5h4.5" />
+    <path d="M9.5 17v-3M12.25 17v-5M15 17v-2" />
+  </Icon>
+)

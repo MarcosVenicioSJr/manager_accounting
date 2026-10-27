@@ -8,6 +8,7 @@ import {
   LogoutIcon,
   MenuIcon,
   ReceiptIcon,
+  ReportIcon,
   ShieldIcon,
   UsersIcon,
 } from '../components/icons'
@@ -22,6 +23,7 @@ const NAV = [
   { to: '/app', label: 'Visão geral', icon: HomeIcon, end: true, soAdmin: false },
   { to: '/app/clientes', label: 'Clientes', icon: UsersIcon, end: false, soAdmin: false },
   { to: '/app/lancamentos', label: 'Lançamentos', icon: ReceiptIcon, end: false, soAdmin: false },
+  { to: '/app/relatorios', label: 'Relatórios', icon: ReportIcon, end: false, soAdmin: false },
   { to: '/app/usuarios', label: 'Usuários', icon: ShieldIcon, end: false, soAdmin: true },
 ]
 
