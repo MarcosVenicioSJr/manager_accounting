@@ -25,7 +25,7 @@ Menu **Relatórios** com dois relatórios, cada um em **PDF** e **Excel**, com a
 - **Resumo do escritório:** uma linha por cliente com compras, dívidas, despesas e total no período.
 
 - **Branch:** `feature/relatorios`, criada a partir da `main` depois do merge do registro 012.
-- **Pull request:** ver o link no fim do registro.
+- **Pull request:** https://github.com/MarcosVenicioSJr/manager_accounting/pull/7
 
 ## Decisões (26/10/2026)
 
