@@ -24,7 +24,7 @@ Módulo de **lançamentos dos clientes**: compras, dívidas e despesas, com data
 Antes deste registro, o PR #5 (`feature/dashboard`) foi mergeado na `main` em 26/10/2026.
 
 - **Branch:** `feature/lancamentos`, criada a partir da `main`.
-- **Pull request:** ver o link no fim do registro.
+- **Pull request:** https://github.com/MarcosVenicioSJr/manager_accounting/pull/6
 
 ## Decisões (26/10/2026)
 
