@@ -24,6 +24,7 @@ Antes da revisão, todas as branches pendentes foram conferidas: as 12 já estav
 Depois veio uma revisão do sistema inteiro: banco, SQL, back-end e front. Foram corrigidos três problemas e um detalhe de código.
 
 - **Branch:** `fix/revisao-geral`.
+- **Pull request:** https://github.com/MarcosVenicioSJr/manager_accounting/pull/10
 
 ## O que foi testado
 
