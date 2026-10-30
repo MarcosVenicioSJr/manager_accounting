@@ -205,6 +205,8 @@ class RecuperacaoSenhaServiceTest {
         assertThat(token.estaValido(AGORA)).isFalse();
         verify(tokenRepository).invalidarPendentes(1L, AGORA);
         verify(refreshTokenService).revogarTodos(1L);
+        // Os access tokens já emitidos também deixam de valer
+        assertThat(usuario.getSessoesValidasDesde()).isEqualTo(AGORA);
 
         EmailPendente confirmacao = emailPublicado();
         assertThat(confirmacao.email().assunto()).isEqualTo(RecuperacaoSenhaEmails.ASSUNTO_CONFIRMACAO);

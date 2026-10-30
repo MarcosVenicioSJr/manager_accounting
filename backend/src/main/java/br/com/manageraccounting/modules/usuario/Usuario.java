@@ -2,6 +2,7 @@ package br.com.manageraccounting.modules.usuario;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,6 +61,10 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private PerfilAcesso perfil;
+
+    /** Access tokens emitidos antes deste instante não valem mais (ver {@link #encerrarSessoes}). */
+    @Column(name = "sessoes_validas_desde")
+    private Instant sessoesValidasDesde;
 
     protected Usuario() {
     }
@@ -142,6 +147,20 @@ public class Usuario {
         this.bloqueadoAte = null;
     }
 
+    /**
+     * Derruba os access tokens já emitidos (o refresh token é revogado à parte, no RefreshTokenService).
+     * O instante é truncado em segundos, a mesma precisão do "iat" do JWT: um login feito logo depois, no mesmo
+     * segundo, continua valendo.
+     */
+    public void encerrarSessoes(Instant agora) {
+        this.sessoesValidasDesde = agora.truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    /** true quando o token foi emitido antes do último encerramento de sessões (troca de senha). */
+    public boolean tokenEncerrado(Instant emitidoEm) {
+        return sessoesValidasDesde != null && (emitidoEm == null || emitidoEm.isBefore(sessoesValidasDesde));
+    }
+
     /** Meu perfil: nome e telefone mudam na hora (e-mail e senha só depois da confirmação por e-mail). */
     public void atualizarDados(String nomeCompleto, String telefone) {
         this.nomeCompleto = nomeCompleto;
@@ -208,5 +227,9 @@ public class Usuario {
 
     public PerfilAcesso getPerfil() {
         return perfil;
+    }
+
+    public Instant getSessoesValidasDesde() {
+        return sessoesValidasDesde;
     }
 }

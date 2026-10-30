@@ -40,6 +40,8 @@ import './lancamentos.css'
 const TAMANHO_PAGINA = 20
 const ESPERA_BUSCA_MS = 300
 const DATA = /^\d{4}-\d{2}-\d{2}$/
+// Nome mostrado quando o ?cliente= do link não existe (ou é de outro escritório)
+const CLIENTE_NAO_ENCONTRADO = 'Cliente não encontrado'
 
 type Props = {
   // Aba do cliente: lista só os lançamentos dele e o formulário já vem com o cliente
@@ -138,7 +140,7 @@ export function LancamentosPainel({ cliente, cabecalho }: Props) {
       .then((c) => setNomesClientes((atual) => ({ ...atual, [c.id]: c.nome })))
       .catch(() => {
         if (!controle.signal.aborted) {
-          setNomesClientes((atual) => ({ ...atual, [clienteDoFiltro]: 'Cliente não encontrado' }))
+          setNomesClientes((atual) => ({ ...atual, [clienteDoFiltro]: CLIENTE_NAO_ENCONTRADO }))
         }
       })
     return () => controle.abort()
@@ -609,7 +611,14 @@ export function LancamentosPainel({ cliente, cabecalho }: Props) {
         open={formulario.aberto}
         lancamento={formulario.lancamento}
         clienteFixo={cliente ? { id: cliente.id, nome: cliente.nome } : undefined}
-        clienteInicial={!cliente && clienteFiltrado && nomesClientes[clienteFiltrado.id] ? clienteFiltrado : undefined}
+        clienteInicial={
+          !cliente &&
+          clienteFiltrado &&
+          nomesClientes[clienteFiltrado.id] &&
+          nomesClientes[clienteFiltrado.id] !== CLIENTE_NAO_ENCONTRADO
+            ? clienteFiltrado
+            : undefined
+        }
         onClose={() => setFormulario({ aberto: false, lancamento: null })}
         onSalvo={(_, mensagem) => {
           setFormulario({ aberto: false, lancamento: null })

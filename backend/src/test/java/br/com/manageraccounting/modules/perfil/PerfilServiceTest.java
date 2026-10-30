@@ -209,6 +209,9 @@ class PerfilServiceTest {
         assertThat(usuario.getSenhaHash()).isEqualTo(novoHash);
         assertThat(pendente.getConfirmadoEm()).isEqualTo(AGORA);
         verify(refreshTokenService).revogarTodos(1L);
+        // Os access tokens já emitidos também deixam de valer
+        assertThat(usuario.getSessoesValidasDesde()).isEqualTo(AGORA);
+        assertThat(usuario.tokenEncerrado(AGORA.minusSeconds(1))).isTrue();
         verify(tokenRedefinicaoRepository).invalidarPendentes(1L, AGORA);
         assertThat(emailPublicado().assunto()).isEqualTo(PerfilEmails.ASSUNTO_SENHA_ALTERADA);
     }
@@ -232,6 +235,7 @@ class PerfilServiceTest {
 
         assertThat(usuario.getEmail()).isEqualTo("maria.nova@exemplo.com");
         verify(refreshTokenService, never()).revogarTodos(anyLong());
+        assertThat(usuario.getSessoesValidasDesde()).isNull();
         verify(tokenRedefinicaoRepository).invalidarPendentes(1L, AGORA);
         EmailMessage aviso = emailPublicado();
         assertThat(aviso.para()).isEqualTo("maria@exemplo.com");

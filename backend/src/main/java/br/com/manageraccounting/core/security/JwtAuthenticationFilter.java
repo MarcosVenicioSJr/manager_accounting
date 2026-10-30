@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * Lê o access token do header Authorization, valida e preenche o SecurityContext e o TenantContext.
  * <p>
  * A cada requisição o usuário e o tenant são conferidos no banco: usuário ou tenant desativado perde o acesso
- * na hora, e quem ainda não concluiu o primeiro acesso recebe apenas a autoridade {@code ROLE_PRIMEIRO_ACESSO}
+ * na hora, token emitido antes da última troca de senha deixa de valer, e quem ainda não concluiu o primeiro acesso recebe apenas a autoridade {@code ROLE_PRIMEIRO_ACESSO}
  * (só pode chamar o endpoint de primeiro acesso). O administrador do escritório recebe também {@code ROLE_ADMIN};
  * como o perfil é lido do banco, mudar o perfil vale na próxima requisição.
  * <p>
@@ -71,6 +71,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         Optional<Usuario> usuario = usuarioRepository.findAtivoById(claims.get().userId());
         if (usuario.isEmpty() || !usuario.get().getTenantId().equals(claims.get().tenantId())) {
+            return;
+        }
+        // Token emitido antes de uma troca de senha: a sessão foi encerrada (não basta revogar o refresh token)
+        if (usuario.get().tokenEncerrado(claims.get().emitidoEm())) {
             return;
         }
 

@@ -29,7 +29,7 @@ class JwtServiceTest {
         AccessToken token = service.generateAccessToken(7L, 3L);
 
         assertThat(token.expiresInSeconds()).isEqualTo(Duration.ofHours(4).toSeconds());
-        assertThat(service.parse(token.value())).contains(new TokenClaims(7L, 3L));
+        assertThat(service.parse(token.value())).contains(new TokenClaims(7L, 3L, AGORA));
     }
 
     @Test
