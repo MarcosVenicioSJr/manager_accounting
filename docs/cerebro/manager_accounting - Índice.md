@@ -31,6 +31,7 @@ Backoffice multi-tenant para contadores organizarem seus clientes.
 | 012 | [[012 - Lancamentos]] | 2026-10-26 | Lançamentos | Concluído (na `main`) |
 | 013 | [[013 - Relatorios]] | 2026-10-26 | Relatórios | Concluído (na `main`) |
 | 014 | [[014 - Relatorio por categoria]] | 2026-10-26 | Relatórios | Concluído (na `main`) |
+| 015 | [[015 - Revisao geral e correcoes]] | 2026-10-29 | Geral (segurança, erros, lançamentos) | Em revisão (PR) |
 
 ## Módulos
 

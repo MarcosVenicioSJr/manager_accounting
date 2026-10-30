@@ -46,6 +46,9 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").permitAll()
+                        // Página de erro do Spring: sem isto um erro 500 (ou rota inexistente) chega ao front como
+                        // 401 "Não autenticado", porque o redirecionamento interno para /error não leva o login
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/auth/login", "/api/auth/refresh", "/api/auth/logout",
                                 "/api/auth/recuperar-senha", "/api/auth/redefinir-senha",

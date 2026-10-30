@@ -17,7 +17,8 @@ import io.jsonwebtoken.security.Keys;
 
 /**
  * Gera e valida o access token (JWT assinado com HS256).
- * O token carrega apenas {@code userId} e {@code tenantId} (além de iat/exp).
+ * O token carrega apenas {@code userId} e {@code tenantId} (além de iat/exp). O iat é obrigatório: é com ele que o
+ * filtro recusa tokens emitidos antes de uma troca de senha.
  */
 @Service
 public class JwtService {
@@ -64,10 +65,12 @@ public class JwtService {
 
             Object userId = claims.get(CLAIM_USER_ID);
             Object tenantId = claims.get(CLAIM_TENANT_ID);
-            if (!(userId instanceof Number) || !(tenantId instanceof Number)) {
+            Date issuedAt = claims.getIssuedAt();
+            if (!(userId instanceof Number) || !(tenantId instanceof Number) || issuedAt == null) {
                 return Optional.empty();
             }
-            return Optional.of(new TokenClaims(((Number) userId).longValue(), ((Number) tenantId).longValue()));
+            return Optional.of(new TokenClaims(((Number) userId).longValue(), ((Number) tenantId).longValue(),
+                    issuedAt.toInstant()));
         } catch (JwtException | IllegalArgumentException ex) {
             return Optional.empty();
         }
@@ -76,6 +79,7 @@ public class JwtService {
     public record AccessToken(String value, long expiresInSeconds) {
     }
 
-    public record TokenClaims(Long userId, Long tenantId) {
+    /** @param emitidoEm "iat" do token (precisão de segundos), usado para recusar tokens anteriores à troca de senha */
+    public record TokenClaims(Long userId, Long tenantId, Instant emitidoEm) {
     }
 }

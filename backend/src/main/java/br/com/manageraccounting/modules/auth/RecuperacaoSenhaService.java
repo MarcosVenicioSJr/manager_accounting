@@ -122,6 +122,7 @@ public class RecuperacaoSenhaService {
         encontrado.token().marcarComoUtilizado(agora);
         tokenRepository.invalidarPendentes(usuario.getId(), agora);
         refreshTokenService.revogarTodos(usuario.getId());
+        usuario.encerrarSessoes(agora);
 
         String nomeEmpresa = tenantAtivo(usuario.getTenantId()).map(Tenant::getNomeEmpresa).orElse("");
         eventPublisher.publishEvent(new EmailPendente(RecuperacaoSenhaEmails.confirmacao(

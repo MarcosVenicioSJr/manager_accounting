@@ -206,6 +206,7 @@ public class PerfilService {
         if (pendente.getTipo() == TipoAlteracao.SENHA) {
             usuario.redefinirSenha(pendente.getValorNovo());
             refreshTokenService.revogarTodos(usuario.getId());
+            usuario.encerrarSessoes(agora);
             eventPublisher.publishEvent(new EmailPendente(PerfilEmails.senhaAlterada(
                     usuario.getEmail(), usuario.getNomeCompleto(), nomeEscritorio(usuario), linkLogin)));
             log.info("Troca de senha confirmada por e-mail: usuario={}", usuario.getId());
