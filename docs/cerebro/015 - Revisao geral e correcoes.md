@@ -3,7 +3,7 @@ projeto: manager_accounting
 registro: 015
 titulo: Revisão geral do sistema e correções
 data: 2026-10-29
-status: em revisão (PR aberto; falta rodar mvn test localmente)
+status: concluído (na main desde 29/10/2026; falta rodar mvn test localmente)
 modulo: geral
 tags:
   - manager_accounting
